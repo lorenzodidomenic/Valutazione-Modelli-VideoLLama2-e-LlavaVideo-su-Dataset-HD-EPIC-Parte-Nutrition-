@@ -1,0 +1,96 @@
+# ---------- macOS ----------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# ---------- Python ----------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ---------- Ambienti virtuali ----------
+venv/
+vnev/
+.venv/
+env/
+ENV/
+pyvenv.cfg
+
+# ---------- Jupyter ----------
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+*.nbconvert.ipynb
+
+# ---------- Editor / IDE ----------
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ---------- Segreti / configurazioni locali ----------
+.env
+.env.*
+*.key
+credentials.json
+
+# ---------- Dataset video HD-EPIC (decine di GB) ----------
+videos_image_nutrition_estimation/
+videos_nutrition_change/
+videos_nutrition_estimation/
+
+# ---------- Video sottocampionati e pannelli mosaico (generati) ----------
+videos_image_nutrition_estimation_sampled/
+videos_nutrition_change_sampled/
+videos_nutrition_estimation_sampled/
+videos_image_nutrition_estimation_panels/
+videos_nutrition_change_panels/
+videos_nutrition_estimation_panels/
+
+# ---------- Media in generale ----------
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.webm
+*.MP4
+
+# ---------- Pesi dei modelli e checkpoint ----------
+*.pt
+*.pth
+*.ckpt
+*.bin
+*.safetensors
+*.onnx
+*.h5
+checkpoints/
+models/
+weights/
+huggingface/
+.cache/
+
+# ---------- Output di inferenza / log ----------
+outputs/
+output/
+results/
+runs/
+logs/
+*.log
+wandb/
+
+# ---------- Repository esterno clonato ----------
+preprocessing_folder/hd-epic-downloader/
+
+# ---------- Eccezioni: annotazioni e benchmark vanno versionati ----------
+!hd-epic-annotations/**/*.json
+!preprocessing_folder/*.json
+!preprocessing_folder/data/md5.txt
