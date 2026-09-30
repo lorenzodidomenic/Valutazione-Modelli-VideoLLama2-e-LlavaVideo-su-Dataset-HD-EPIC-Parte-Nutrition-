@@ -33,12 +33,10 @@ Dettaglio per prototipo:
 | Media per prototipo | 36.5 | 39.9 |
 | Aggregata sulle domande | 33.2 | 36.4 |
 
-In tutte le esecuzioni il 100% delle risposte è stato interpretato al primo livello del
-parser (lettera in apertura): nessuna accuratezza è stata persa per ragioni di formato.
 
 ### Video Panels
 
-Video liscio contro pannelli 2×2, sulle stesse 96 domande dei due prototipi basati su
+Video naturale contro pannelli 2×2, sulle stesse 96 domande dei due prototipi basati su
 video e a parità di finestra di contesto.
 
 | Prototipo | VideoLLaMA 2 base | panels | LLaVA-Video base | panels |
