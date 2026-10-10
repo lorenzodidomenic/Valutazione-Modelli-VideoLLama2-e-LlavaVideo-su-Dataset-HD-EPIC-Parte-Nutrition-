@@ -35,8 +35,10 @@ Dettaglio per prototipo:
 
 Su `image_nutrition_estimation` entrambi i modelli restano vicini al caso (20%): ogni
 domanda mostra 5 fotogrammi presi da 5 video diversi a timestamp precisi e chiede quale
-ingrediente abbia più calorie, grassi, carboidrati o proteine, e i modelli non riescono a
-riconoscere e confrontare gli ingredienti inquadrati.
+ingrediente abbia più calorie, grassi, carboidrati o proteine. Le opzioni sono nomi di
+ingredienti come in `video_nutrition_estimation`, ma qui la conoscenza linguistica non
+basta: un'ipotesi, non verificata, è che i valori si riferiscano alla quantità usata nella
+ricetta, visibile solo nelle immagini.
 
 
 ### Video Panels

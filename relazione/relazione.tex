@@ -1,0 +1,534 @@
+\documentclass{article}
+\usepackage[margin=2.5cm]{geometry} % Riduce i margini in alto, in basso e ai lati
+\usepackage{graphicx} % Per l'inserimento delle immagini
+\usepackage{booktabs} % Per la formattazione professionale delle tabelle (\toprule, \midrule, \bottomrule)
+\usepackage{xurl}     % Gestione avanzata dei punti di a capo
+\usepackage{parskip}
+
+\title{Progetto Deep Learning}
+\author{Lorenzo Didomenico}
+\date{Ottobre 2026}
+
+\begin{document}
+
+\maketitle
+ \clearpage
+% --- AGGIUNGI DA QUI ---
+\tableofcontents
+\clearpage % Sposta l'Introduzione nella pagina successiva
+% --- A QUI ---
+
+\section{Introduzione}
+
+I Video Large Language Model hanno raggiunto buoni risultati su video brevi e
+con un contenuto visivo esplicito, ma restano deboli quando la risposta richiede
+di seguire un'attività lunga e ripresa in prima persona. HD-EPIC~\cite{hdepic} è
+un dataset egocentrico di attività di cucina annotato in modo molto dettagliato,
+a cui è associato un benchmark VQA a scelta multipla costruito proprio per
+testare questi modelli: nel paper originale i modelli testati restano molto
+lontani dall'accuratezza degli annotatori umani.
+
+Questo progetto si concentra su una sola categoria del benchmark, \emph{Nutrition},
+composta da 200 domande a cinque opzioni divise in tre prototipi. È la categoria
+in cui la risposta dipende dall'individuare gli ingredienti lungo la preparazione ed in particolare dare risposte riguardo i loro valori nutrizionali.
+
+Gli obiettivi sono due. Il primo è \textbf{riprodurre le baseline} riportate in
+HD-EPIC (Tab.~2, colonna \emph{Nutrition}) per due modelli open da 7B,
+VideoLLaMA~2~\cite{videollama2} e LLaVA-Video~\cite{llavavideo}, per cui il
+paper riporta rispettivamente 32.7\% e 38.7\% contro un 20\% casuale. Il secondo
+è \textbf{valutare un metodo di visual prompting}, i Video
+Panels~\cite{videopanels}, che a parità di finestra di contesto sostituisce ogni
+frame con una griglia $2\times2$ di frame consecutivi: si quadruplica
+così la copertura temporale al prezzo di un quarto della risoluzione spaziale.
+
+Entrambi gli esperimenti passano da un unico modulo di valutazione, condiviso
+dai due modelli che fissa il prompt, il parsing delle risposte e le metriche:
+l'unica parte specifica del modello è la funzione di inferenza. Questo è ciò che
+rende confrontabili i risultati, perché con parser diversi la differenza di
+accuracy fra due modelli misurerebbe anche la differenza fra i parser.
+
+I risultati ottenuti sono i seguenti. Le baseline sono riprodotte su tutte le
+200 domande: VideoLLaMA~2 ottiene $36.7\%$, $4.0$ punti sopra il valore
+pubblicato, mentre LLaVA-Video ottiene $38.7\%$, esattamente il valore
+pubblicato. I Video Panels, invece, non producono alcun guadagno
+sulla categoria: $0.0$ punti per VideoLLaMA~2 e $-1.0$ per LLaVA-Video. Il dato
+più interessante non è però il risultato aggregato, ma il fatto che i due
+modelli si spostino in direzioni opposte sui due prototipi: VideoLLaMA~2 guadagna con i Video Panels su \texttt{nutrition\_change} e perde su \texttt{video\_nutrition\_estimation}, mentre LLaVA-Video si comporta in maniera opposta.
+
+\section{Dataset e benchmark}
+
+HD-EPIC~\cite{hdepic} raccoglie 41 ore di video egocentrici
+registrati in 9 cucine domestiche, per un totale di 156 video di durata
+media pari a 15.9 minuti. La caratteristica del dataset è il numero delle
+annotazioni, in media 263 al minuto, che coprono azioni fine-grained, passaggi
+delle ricette, eventi audio, movimenti degli oggetti, digital twin 3D delle
+cucine e direzione dello sguardo.
+
+Su queste annotazioni è costruito un benchmark VQA a scelta multipla di circa
+26.000 domande, suddivise in sette categorie: \emph{Recipes}, \emph{Ingredients},
+\emph{Nutrition}, \emph{Fine-grained Actions}, \emph{3D Perception},
+\emph{Object Motion} e \emph{Gaze}.
+
+\subsection{La categoria Nutrition}
+
+Il lavoro si limita alla categoria \emph{Nutrition}. La categoria comprende 200 domande divise in tre prototipi, riassunti nella
+Tabella~\ref{tab:prototipi}. Tutte le domande hanno cinque opzioni, per cui il
+baseline casuale è del 20\%. I video coinvolti sono 50, appartenenti a 8
+partecipanti diversi.
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabular}{@{}lccl@{}}
+\toprule
+Prototipo & $N$ & Input & Domanda \\
+\midrule
+\texttt{video\_nutrition\_estimation} & 50 & 1 video & ingrediente con più \\
+ & & & carbs/fat/protein/calorie \\[2pt]
+\texttt{nutrition\_change} & 50 & 1 video + & variazione dei 4 valori \\
+ & & intervallo & fra due istanti \\[2pt]
+\texttt{image\_nutrition\_estimation} & 100 & 5 frame & quale dei 5 ingredienti \\
+ & & (5 video) & mostrati ha più X \\
+\bottomrule
+\end{tabular}
+\caption{I tre prototipi della categoria \emph{Nutrition}. Ogni domanda ha cinque opzioni.}
+\label{tab:prototipi}
+\end{table}
+
+I tre prototipi non richiedono lo stesso tipo di ragionamento. In
+\textbf{video\_nutrition\allowbreak\_estimation} la domanda riguarda l'intera ricetta e le
+opzioni sono nomi di ingredienti; in \textbf{nutrition\allowbreak\_change} la domanda è
+delimitata da due timestamp espliciti e le opzioni sono quattro valori
+numerici; in \textbf{image\_nutrition\allowbreak\_estimation} l'input non è un video ma
+cinque frame isolati, estratti da cinque video diversi a istanti indicati
+nelle annotazioni. Per questa ultima differenza il prototipo resterà escluso dal secondo
+esperimento.
+
+Per esempio, una domanda di \textbf{video\_nutrition\allowbreak\_estimation} è
+\emph{``What is the ingredient with highest carbs in this recipe?''}, con opzioni
+\emph{butternut squash}, \emph{onions}, \emph{spring greens}, \emph{split red
+lentils} e una quinta opzione che raggruppa più ingredienti; la risposta corretta
+è la quarta.
+
+\section{Preprocessing dei dati}
+
+La preparazione dei dati è stata una parte importante e non trascurabile del lavoro.
+
+\subsection{Download}
+
+Gli identificativi dei video necessari sono stati estratti dai tre file di
+annotazione della categoria, ottenendo 50 video distinti appartenenti a 8
+partecipanti. Il download è avvenuto in due passaggi: prima tramite il
+downloader ufficiale del dataset, poi con uno script dedicato che verifica quali
+file risultino mancanti per ciascun prototipo e li recupera in parallelo dal
+repository pubblico. Al termine tutti i 50 video sono stati ottenuti in forma
+utilizzabile: quelli il cui primo download era incompleto sono stati scaricati
+di nuovo e verificati con il checksum MD5 pubblicato insieme al dataset.
+
+\subsection{Sottocampionamento}
+
+I video originali durano in media circa 16 minuti, il che li
+rende non facilmente utilizzabili
+nell'ambiente di esecuzione. Ogni video è quindi stato ridotto a 128
+frame, scelti in modo uniforme su tutta la sua durata e riscritti come
+video a 1~fps alla risoluzione originale di $1408\times1408$ pixel. La copertura
+temporale resta quella dell'intero video, mentre la densità di campionamento
+scende: si tratta di un'approssimazione rispetto al protocollo originale.
+
+\subsection{Estrazione dei frame per \texttt{image\_nutrition\_estimation}}
+
+Il prototipo \textbf{image\_nutrition\allowbreak\_estimation} non può usare i video
+sottocampionati: ogni domanda richiede cinque frame a timestamp esatti, mentre il
+video a 128 frame contiene un frame ogni 14 secondi circa del video originale, e
+il frame richiesto in generale non è fra questi. I 132 frame distinti richiesti
+dalle 100 domande sono quindi stati estratti dai video integrali, all'istante
+indicato nelle annotazioni. Per non dover scaricare per intero i 47 video
+coinvolti (circa 58~GB), i frame sono stati letti direttamente dal repository
+pubblico del dataset, scaricando solo la porzione di file attorno a ciascun
+timestamp.
+
+\subsection{Generazione dei pannelli}
+\label{sec:panels-gen}
+
+Per il secondo esperimento è stata reimplementata la procedura di creazione
+dei Video Panels a partire dal codice ufficiale del Paper~\cite{videopanels}. Dato un video, si estraggono $C \cdot \alpha \cdot \beta$ frame
+uniformi e li si dispone in $C$ griglie $\alpha \times \beta$ di frame
+consecutivi fra quelli estratti. Sono stati usati i parametri indicati dagli autori del Paper come
+configurazione migliore: $C=32$, $\alpha=\beta=2$, bordo nullo fra i riquadri e
+stride temporale $\gamma=1$. Ogni video produce quindi 32 pannelli che coprono complessivamente 128 frame, gli stessi 128 del video
+sottocampionato.  Viene quindi esteso il contesto temporale mentre diminuisce il contesto spaziale. La Figura~\ref{fig:panel} ne mostra un esempio.
+
+Il metodo si applica solo quando il video è abbastanza lungo da rendere
+sensato il processo; in caso contrario si ricade sul campionamento
+uniforme ordinario.
+
+Prima di ogni esecuzione viene inoltre eseguito un controllo che apre davvero
+ciascun file richiesto e separa le domande eseguibili da quelle da escludere:
+una domanda il cui input non è leggibile produrrebbe un'eccezione che verrebbe
+contata come risposta sbagliata, abbassando l'accuracy. Con il dataset completo
+tutte le 200 domande del primo esperimento risultano eseguibili.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.5\linewidth]{figure.jpg}
+    \caption{Un pannello $2\times2$: quattro frame consecutivi del video
+occupano lo spazio di un singolo frame in ingresso al modello.}
+    \label{fig:panel}
+\end{figure}
+
+\section{Valutazione e Metriche}
+\label{sec:protocollo}
+
+Affinché il confronto risulti sensato, tutto tranne il modello è stato gestito in maniera identica. Prompt, interpretazione
+delle risposte e calcolo delle metriche sono quindi raccolti in un unico modulo
+condiviso dai due esperimenti sui due modelli: l'unica parte specifica del modello è una funzione
+di inferenza che riceve l'input visivo e il prompt e restituisce il testo
+generato. Se ciascun modello avesse il proprio parser, la differenza di
+accuracy misurata comprenderebbe anche la differenza fra i parser.
+
+\subsection{Prompt}
+
+Il prompt è deliberatamente minimale e riproduce il formato del paper: la
+domanda, le cinque opzioni etichettate da A a E, e l'istruzione finale
+\emph{``Answer with the option's letter from the given choices directly.''}.
+
+Non viene usato alcun system prompt, perché il paper di riferimento non ne
+prevede uno.
+
+Viene impostato in fase di richiesta un
+limite di 32 token in uscita. La risposta attesa è una singola lettera, quindi il
+limite non tronca risposte legittime.
+
+\subsection{Interpretazione delle risposte}
+
+Un modello non sempre risponde nel formato richiesto: può anteporre
+punteggiatura, premettere una formula come \emph{``the answer is''}, ricopiare il
+testo dell'opzione invece della lettera, o rispondere con una cifra. Il parsing è
+quindi organizzato in cinque livelli, applicati in ordine dal più stretto al più
+permissivo:
+
+\begin{enumerate}\itemsep2pt
+  \item lettera all'inizio, eventualmente fra parentesi o seguita da
+        punteggiatura;
+  \item formula esplicita del tipo \emph{answer/option/choice} seguita da una
+        lettera;
+  \item testo di una delle opzioni ricopiato, purché corrisponda a una sola
+        opzione;
+  \item una sola lettera valida isolata nel resto del testo;
+  \item una cifra da 1 a 5, interpretata come indice dell'opzione.
+\end{enumerate}
+
+Se nessun livello si applica, la risposta viene marcata come non interpretabile e
+conteggiata come errata. Il livello che ha prodotto l'esito viene salvato insieme
+alla risposta grezza del modello, così da poter sempre ispezionare \emph{come} si
+è arrivati a un certo indice. Il primo livello è costruito in modo da non
+confondere l'iniziale di una parola con un'etichetta, evitando per esempio di
+leggere come opzione~C la \emph{C} di \emph{``Calories changed by\ldots''}.
+
+\subsection{Metriche}
+
+Il paper di riferimento definisce l'accuracy di una categoria come la
+\textbf{media delle accuracy dei singoli prototipi}, non come l'accuracy
+aggregata su tutte le domande. Con prototipi di dimensione diversa (50, 50 e 100
+domande) i due valori non coincidono, per cui entrambi vengono riportati: il
+primo è quello confrontabile con i valori pubblicati, il secondo è indicato come
+accuracy aggregata. Il riferimento casuale è 20\%.
+
+Oltre all'accuracy vengono riportate due diagnostiche. La prima è la
+distribuzione dei metodi di parsing, che dice quanta accuracy si stia
+eventualmente perdendo per ragioni di formato anziché di contenuto. La seconda è
+il \textbf{bias posizionale}: la distribuzione delle lettere scelte dal modello
+messa a confronto con quella delle risposte corrette. Se un modello fosse
+soltanto impreciso, le due distribuzioni si somiglierebbero; se invece sceglie sempre le stesse lettere mentre la risposta corretta è dispersa, non sta
+rispondendo alla domanda ma seguendo una preferenza a priori sul formato. È la
+distinzione fra \emph{il modello sbaglia} e \emph{il modello non sta guardando il
+video}, ed è la spiegazione tipica di un'accuracy inferiore al caso.
+
+\subsection{Esecuzione}
+
+Ogni risposta viene salvata insieme
+alla risposta grezza del modello, all'indice predetto, a quello corretto e al metodo di
+parsing: questo rende ogni esecuzione riprendibile dopo un'interruzione
+dell'ambiente e, soprattutto, rende i numeri di accuracy verificabili a
+posteriori riga per riga. Le risposte terminate con un errore di esecuzione
+(per esempio memoria GPU esaurita) non vengono considerate completate e sono
+ripetute alla ripresa successiva.
+
+\section{Esperimento 1: Valutazione di VideoLLaMA 2 e LLaVA-Video}
+\label{sec:baseline}
+
+\subsection{Setup}
+
+Entrambi i modelli sono stati eseguiti su una singola GPU NVIDIA A100 da 80~GB.
+
+\textbf{VideoLLaMA~2 7B}~\cite{videollama2} è stato caricato dal checkpoint
+ufficiale in precisione \texttt{float16}. Il repository forza l'uso di
+FlashAttention sulla vision tower, che però non lo supporta: è stato necessario
+sostituirla con l'implementazione \emph{eager} per rendere il modello
+eseguibile. L'input visivo passa sempre dal preprocessore del repository, che
+applica ridimensionamento a $336\times336$, normalizzazione CLIP e padding, sia
+che riceva il percorso di un video sia che riceva una lista di immagini. Un
+dettaglio rilevante è che il preprocessore ricampiona l'input a
+\texttt{num\_frames}, il cui valore di default è \textbf{8}: dei 128 frame
+preparati a monte, il modello ne vede effettivamente otto.
+
+\textbf{LLaVA-Video 7B}~\cite{llavavideo} è stato caricato tramite il loader
+ufficiale in precisione \texttt{bfloat16} con attenzione \texttt{sdpa}. A
+differenza del precedente, richiede frame già estratti: il campionamento
+uniforme viene fatto esplicitamente a \textbf{32}
+frame. La scelta verrà motivata nella sezione riguardante l'esperimento dei Panels.
+
+I due modelli differiscono quindi per quanti frame ricevono. È una
+differenza che va tenuta presente nel confronto e su cui si torna fra i limiti.
+
+\subsection{Risultati}
+
+La Tabella~\ref{tab:baseline} confronta i valori ottenuti con quelli pubblicati.
+Entrambe le baseline sono riprodotte: VideoLLaMA~2 risulta 4.0 punti sopra il
+valore di riferimento, mentre LLaVA-Video coincide con il valore pubblicato. L'ordinamento fra i due
+modelli è rispettato, e in entrambi i casi il valore si colloca nettamente sopra
+il 20\% del caso e altrettanto nettamente sotto l'85\% degli annotatori umani.
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Modello & Paper & Riprodotto & $\Delta$ \\
+\midrule
+VideoLLaMA 2 7B & 32.7 & 36.7 & $+4.0$ \\
+LLaVA-Video 7B  & 38.7 & 38.7 & $+0.0$ \\
+\midrule
+Umano           & 85.0 & --- & \\
+Casuale         & 20.0 & --- & \\
+\bottomrule
+\end{tabular}
+\caption{accuracy sulla categoria \emph{Nutrition} (\%), come media delle
+accuracy per prototipo.}
+\label{tab:baseline}
+\end{table}
+
+Il sottocampionamento dei video rende il nostro protocollo diverso da quello
+originale, e una differenza di qualche punto è attesa: con 50 domande per
+prototipo una sola risposta vale 2 punti. Il risultato da trattenere è che i
+valori sono compatibili con quelli pubblicati, non che siano superiori.
+
+\subsection{Dettaglio per prototipo}
+
+L'accuracy aggregata nasconde un comportamento molto disomogeneo, riportato
+nella Tabella~\ref{tab:per-prototipo}.
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabular}{@{}lcc@{}}
+\toprule
+Prototipo ($N$) & VideoLLaMA 2 & LLaVA-Video \\
+\midrule
+\texttt{video\_nutrition\_estimation} (50) & 66.0 & 68.0 \\
+\texttt{nutrition\_change} (50) & 16.0 & 22.0 \\
+\texttt{image\_nutrition\_estimation} (100) & 28.0 & 26.0 \\
+\midrule
+Media per prototipo             & 36.7 & 38.7 \\
+Aggregata sulle domande         & 34.5 & 35.5 \\
+\bottomrule
+\end{tabular}
+\caption{accuracy per prototipo (\%). I due modelli si comportano in modo
+molto diverso a seconda del prototipo.}
+\label{tab:per-prototipo}
+\end{table}
+
+Tre osservazioni:
+
+\textbf{Il prototipo \texttt{nutrition\_change} è al livello casuale o sotto.}
+VideoLLaMA~2 ottiene 16.0\%, cioè meno del 20\% casuale. Il bias posizionale
+infatti chiarisce: il modello colloca il 58\% delle proprie
+risposte sull'opzione B, mentre le risposte corrette sono distribuite quasi
+uniformemente sulle cinque lettere. LLaVA-Video mostra lo stesso fenomeno in
+forma attenuata, con il 42\% delle risposte su B e quasi nessuna su E. Su questo
+prototipo i modelli non stanno rispondendo alla domanda: stanno seguendo una
+preferenza a priori sul formato. È coerente con la natura del compito, che
+richiede di leggere valori numerici su una bilancia digitale in un intervallo di
+pochi secondi e di sceglierne la variazione fra cinque quaterne di numeri simili.
+A questo si aggiunge che il modello riceve frame campionati uniformemente su
+tutto il video senza l'indicazione dell'istante a cui ciascuno corrisponde:
+i timestamp citati nella domanda non sono quindi collegabili ai frame, e
+un intervallo di pochi secondi in un video di un quarto d'ora quasi sempre non
+cade su nessuno dei frame ricevuti.
+
+\textbf{Il prototipo \texttt{video\_nutrition\allowbreak\_estimation} è molto sopra la media
+di categoria}, con il 66\% per VideoLLaMA~2 e il 68\% per LLaVA-Video. Una spiegazione
+plausibile è che molte di queste domande siano risolvibili con la sola conoscenza
+linguistica, senza guardare il video: sapere che le lenticchie contengono più
+carboidrati della cipolla non richiede evidenza visiva.
+
+\textbf{Il prototipo \texttt{image\_nutrition\allowbreak\_estimation} resta vicino al
+caso}, con il 28\% e il 26\%. Ogni domanda chiede quale dei cinque ingredienti
+inquadrati abbia più calorie, grassi, carboidrati o proteine, e anche qui le
+opzioni sono nomi di ingredienti. Il divario con il prototipo precedente
+suggerisce che la sola conoscenza linguistica non basti: un'ipotesi plausibile,
+non verificata in questo lavoro, è che i valori nutrizionali delle annotazioni
+si riferiscano alla quantità effettivamente usata nella ricetta, visibile solo
+nelle immagini, e non all'ingrediente in astratto.
+
+\section{Esperimento 2: Valutazione dei VLM con la tecnica dei Video Panels}
+\label{sec:panels}
+
+\subsection{Il metodo e la condizione del confronto}
+
+I Video Panels~\cite{videopanels} affrontano un vincolo strutturale dei VLM: la
+finestra di contesto limita quanti frame possono essere dati in pasto al
+modello, e su un video lungo questo significa un campionamento molto rado. Si può quindi ridurre risoluzione spaziale dove non serve: ogni elemento
+della sequenza in ingresso, invece di contenere un frame, contiene una
+griglia $\alpha \times \beta$ di frame consecutivi. A parità di elementi in
+ingresso la copertura temporale si moltiplica per $\alpha\beta$, riducendo di altrettanto il contesto spaziale di ciascun frame.
+
+Il confronto è quindi sensato solo \emph{a parità di finestra di contesto}, ed è
+in questa condizione che è stato condotto. Per VideoLLaMA~2, che ricampiona
+internamente a 8 elementi, si confrontano 8 frame contro 8 pannelli, cioè 8
+contro 32 frame di copertura. Per LLaVA-Video, che lavora con 32 frame, si
+confrontano 32 frame contro 32 pannelli, cioè 32 contro 128. In entrambi i
+casi il modello riceve lo stesso numero di elementi visivi nelle due condizioni e
+quadruplica la copertura temporale passando ai pannelli; cambia il regime
+assoluto in cui la cosa avviene.
+
+L'esperimento è limitato ai due prototipi basati su video, per un totale di 99
+domande valutate. \textbf{image\_nutrition\allowbreak\_estimation} è escluso in quanto il suo input è costituito da cinque frame isolati provenienti
+da cinque video diversi, quindi non esiste alcuna sequenza temporale da
+impacchettare e il metodo non è applicabile.
+
+\subsection{Risultati}
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+& \multicolumn{2}{c}{VideoLLaMA 2} & \multicolumn{2}{c}{LLaVA-Video} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+Prototipo & base & panels & base & panels \\
+\midrule
+\texttt{video\_nutrition\_estimation} & 66.0 & 62.0 & 68.0 & 72.0 \\
+\texttt{nutrition\_change} & 16.3 & 20.4 & 20.4 & 14.3 \\
+\midrule
+Media per prototipo        & 41.2 & 41.2 & 44.2 & 43.2 \\
+$\Delta$                   & \multicolumn{2}{c}{$0.0$} & \multicolumn{2}{c}{$-1.0$} \\
+\bottomrule
+\end{tabular}
+\caption{Video liscio contro pannelli $2\times2$, a parità di finestra di
+contesto e sulle stesse 99 domande. I valori del baseline differiscono da quelli
+della Tabella~\ref{tab:per-prototipo} perché calcolati sul sottoinsieme
+ristretto ai due prototipi video.}
+\label{tab:panels}
+\end{table}
+
+Il risultato aggregato, riportato nella Tabella~\ref{tab:panels}, è che
+\textbf{i Video Panels non producono alcun guadagno} sulla categoria
+\emph{Nutrition}: $0.0$ punti per VideoLLaMA~2 e $-1.0$ per LLaVA-Video.
+Entrambe le variazioni sono troppo piccole per essere distinte dal rumore di
+campionamento e vanno lette come assenza di effetto, non come peggioramento.
+
+È interessante notare che i due modelli
+si spostano in \textbf{direzioni opposte sugli stessi prototipi}, con variazioni
+di ampiezza simile e segno contrario: VideoLLaMA~2 guadagna 4.1 punti su
+\texttt{nutrition\_change} e ne perde 4.0 su
+\texttt{video\_nutrition\_estimation}, mentre LLaVA-Video fa il contrario,
+guadagnando 4.0 punti su \texttt{video\_nutrition\_estimation} e perdendone 6.1 su
+\texttt{nutrition\_change}.
+
+Va detto con chiarezza che su prototipi da circa 50 domande una variazione di 4
+punti corrisponde a due domande: nessuno di questi scarti è statisticamente
+significativo preso singolarmente.
+
+\subsection{Osservazioni sul Visual Prompting}
+
+Applicare la tecnica dei Video Panels (\textbf{Visual Prompting}) non ha portato i vantaggi desiderati. I Video Panels scambiano risoluzione spaziale per risoluzione
+temporale, e questo è vantaggioso quando l'informazione rilevante è
+\emph{dove e quando} accade qualcosa di visivamente evidente. Il prototipo
+\texttt{nutrition\_change} richiede però di leggere \emph{cifre} sul display di
+una bilancia digitale: dividendo per quattro l'area di ciascun frame si
+degrada esattamente il tipo di dettaglio da cui dipende la risposta. Questo è
+coerente con il calo di LLaVA-Video su questo prototipo; VideoLLaMA~2, che nel
+baseline vede solo 8 frame, mostra invece un lieve miglioramento, compatibile con
+un maggior beneficio della copertura temporale quando i frame sono molto pochi.
+In entrambi i casi, però, le variazioni restano entro il rumore di campionamento
+e i due modelli rimangono vicini al livello casuale.
+
+\section{Discussione e conclusioni}
+
+\subsection{Limiti}
+
+I risultati vanno letti tenendo presenti alcuni limiti, che riguardano sia i dati
+sia il disegno sperimentale.
+
+\textbf{Dati.} I video sono stati sottocampionati a 128 fotogrammi anziché usati
+per intero, per i due prototipi basati su video; solo
+\texttt{image\_nutrition\_estimation} usa i frame originali agli istanti
+indicati dalle annotazioni. L'insieme di valutazione coincide invece con quello
+originale: tutte le 200 domande sono state valutate.
+
+\textbf{Frame ricevuti.} I due modelli vedono un numero diverso di frame (8 per
+VideoLLaMA~2, 32 per LLaVA-Video), per cui il confronto diretto fra i due
+modelli mescola l'effetto dell'architettura con quello della quantità di input.
+
+\textbf{Riferimento temporale.} Le domande di \texttt{nutrition\_change} citano
+due istanti precisi del video, ma i modelli ricevono frame campionati
+uniformemente senza l'indicazione del tempo corrispondente; in questo protocollo
+il prototipo misura quindi anche la capacità di collegare i timestamp della
+domanda a frame che quasi sempre non li contengono.
+
+\textbf{Ambito.} Il lavoro copre una sola delle sette categorie del benchmark.
+Le conclusioni valgono per \emph{Nutrition} e non sono estendibili alle altre
+senza ulteriori esperimenti.
+
+\subsection{Sviluppi possibili}
+
+Si individuano tre direzioni. La prima è
+eseguire un \textbf{baseline testuale}, cioè sottoporre le stesse domande a un
+modello senza accesso al video: è la misura che manca per stabilire quanta parte
+dell'accuracy su \texttt{video\_nutrition\_estimation} dipenda da conoscenza
+linguistica anziché da comprensione visiva, ipotesi che qui resta formulata ma
+non verificata. La seconda è variare la geometria dei pannelli, in particolare
+verso griglie più grandi su un modello con finestra di contesto ampia, per capire
+se il compromesso fra risoluzione spaziale e temporale abbia un punto ottimale
+diverso su questo dominio. La terza è applicare i panels non all'intero video
+ma solo alle parti del video più rilevanti per rispondere alla domanda, per
+esempio l'intervallo indicato nelle domande di \texttt{nutrition\_change}.
+
+\subsection{Conclusioni}
+
+Il lavoro ha riprodotto le baseline della categoria \emph{Nutrition} del
+benchmark VQA di HD-EPIC~\cite{hdepic} per due VLM open da 7 miliardi di parametri, ottenendo
+36.7\% per VideoLLaMA~2~\cite{videollama2} e 38.7\% per LLaVA-Video~\cite{llavavideo}, contro i 32.7\% e 38.7\%
+riportati dagli autori. Su questa base ha poi valutato
+i Video Panels~\cite{videopanels} come metodo di visual prompting, trovando che a parità di finestra
+di contesto non producono alcun guadagno sulla categoria, e che il loro effetto
+si distribuisce in modo opposto sui due prototipi a seconda del modello.
+
+\begin{thebibliography}{9}
+
+\bibitem{hdepic}
+T.~Perrett et al.
+\newblock \emph{HD-EPIC: A Highly-Detailed Egocentric Video Dataset}.
+\newblock In \emph{Proceedings of the IEEE/CVF Conference on Computer Vision and
+Pattern Recognition (CVPR)}, 2025.
+
+\bibitem{videollama2}
+Z.~Cheng et al.
+\newblock \emph{VideoLLaMA 2: Advancing Spatial-Temporal Modeling and Audio
+Understanding in Video-LLMs}.
+\newblock arXiv:2406.07476, 2024.
+
+\bibitem{llavavideo}
+Y.~Zhang et al.
+\newblock \emph{Video Instruction Tuning with Synthetic Data}.
+\newblock arXiv:2410.02713, 2024.
+
+\bibitem{videopanels}
+L.~Doorenbos, F.~Spurio, J.~Gall.
+\newblock \emph{Video Panels for Long Video Understanding}.
+\newblock arXiv:2509.23724, 2025.
+
+\end{thebibliography}
+
+\end{document}
