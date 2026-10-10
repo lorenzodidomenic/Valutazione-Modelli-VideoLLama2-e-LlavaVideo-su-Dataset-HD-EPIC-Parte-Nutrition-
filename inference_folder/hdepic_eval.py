@@ -201,19 +201,31 @@ def is_readable(path, cache=None):
     return ok
 
 
-def _required_inputs(item, task, index, panels_index, input_mode, prefer):
+def frame_path(frame_cache, video_id, sec):
+    """Path del fotogramma in cache (stesso nome prodotto da extract_image_frames.py)."""
+    return os.path.join(frame_cache, f"{video_id}_{int(round(sec*1000)):09d}.jpg")
+
+
+def _required_inputs(item, task, index, panels_index, input_mode, prefer,
+                     frame_cache=None):
     """-> [(video_id, risorsa)] necessaria a rispondere alla domanda.
 
-    `risorsa` e' un path mp4, una lista di path di pannelli, o None se assente.
+    `risorsa` e' un path mp4, un path jpg gia' in cache, una lista di path di
+    pannelli, o None se assente.
     """
     modality = TASK_FILES[task][1]
     out = []
     if modality == "images":
-        # 5 fotogrammi a timestamp precisi: serve per forza il video integrale
+        # 5 fotogrammi a timestamp precisi: o sono gia' in cache, o serve il video
+        # INTEGRALE. Mai ripiegare sul _sampled: ha 128 frame a 1 fps e il
+        # timestamp finirebbe su un frame sbagliato senza nessun errore.
         for key in sorted(item["inputs"], key=lambda k: int(re.search(r"\d+", k).group())):
             inp = item["inputs"][key]
-            path, _ = resolve_video(inp["id"], index, prefer="full")
-            out.append((inp["id"], path))
+            cached = frame_cache and frame_path(frame_cache, inp["id"], hhmmss_to_sec(inp["time"]))
+            if cached and os.path.exists(cached):
+                out.append((inp["id"], cached))
+            else:
+                out.append((inp["id"], index["full"].get(inp["id"])))
     elif input_mode == "panels":
         for inp in item["inputs"].values():
             out.append((inp["id"], (panels_index or {}).get(inp["id"])))
@@ -225,16 +237,19 @@ def _required_inputs(item, task, index, panels_index, input_mode, prefer):
 
 
 def usable_items(ann_dir, task, index, panels_index=None, input_mode="video",
-                 prefer="sampled", cache=None):
+                 prefer="sampled", cache=None, frame_cache=None):
     """Divide le domande in (utilizzabili, scartate-con-motivo)."""
     ann = load_annotations(ann_dir, task)
     ok, skipped = {}, {}
     for key, item in ann.items():
         bad = []
         for vid, res in _required_inputs(item, task, index, panels_index,
-                                         input_mode, prefer):
+                                         input_mode, prefer, frame_cache):
             if isinstance(res, list):          # pannelli: ne basta almeno uno
                 if not res:
+                    bad.append(vid)
+            elif isinstance(res, str) and res.endswith(".jpg"):  # frame in cache
+                if os.path.getsize(res) == 0:
                     bad.append(vid)
             elif not is_readable(res, cache):  # video: deve aprirsi davvero
                 bad.append(vid)
@@ -246,14 +261,14 @@ def usable_items(ann_dir, task, index, panels_index=None, input_mode="video",
 
 
 def preflight(ann_dir, index, tasks=None, panels_index=None, input_mode="video",
-              prefer="sampled", cache=None):
+              prefer="sampled", cache=None, frame_cache=None):
     """Tabella di copertura reale. Da stampare SEMPRE prima di un run."""
     cache = {} if cache is None else cache
     rows, details = [], {}
     for task in (tasks or list(TASK_FILES)):
         ann = load_annotations(ann_dir, task)
         ok, skipped = usable_items(ann_dir, task, index, panels_index,
-                                   input_mode, prefer, cache)
+                                   input_mode, prefer, cache, frame_cache)
         details[task] = skipped
         rows.append({"task": task,
                      "input": "frames" if TASK_FILES[task][1] == "images" else input_mode,
@@ -313,10 +328,10 @@ def _visual_input(item, task, index, panels_index, input_mode, prefer,
         paths = []
         for key in sorted(item["inputs"], key=lambda k: int(re.search(r"\d+", k).group())):
             inp = item["inputs"][key]
-            video, _ = resolve_video(inp["id"], index, prefer="full")
             sec = hhmmss_to_sec(inp["time"])
-            out = os.path.join(frame_cache, f"{inp['id']}_{int(round(sec*1000)):09d}.jpg")
+            out = frame_path(frame_cache, inp["id"], sec)
             if not os.path.exists(out):
+                video = index["full"].get(inp["id"])   # solo integrale, vedi _required_inputs
                 (frame_extractor or extract_frame)(video, sec, out)
             paths.append(out)
         return paths, "frames"
@@ -338,7 +353,7 @@ def run_task(task, ann_dir, index, infer_fn, out_jsonl, panels_index=None,
     rilanciare la cella riprende senza rifare le domande gia' fatte.
     """
     ann, skipped = usable_items(ann_dir, task, index, panels_index,
-                                input_mode, prefer, readable_cache)
+                                input_mode, prefer, readable_cache, frame_cache)
     if frame_cache:
         os.makedirs(frame_cache, exist_ok=True)
     if verbose:
@@ -350,7 +365,10 @@ def run_task(task, ann_dir, index, infer_fn, out_jsonl, panels_index=None,
         with open(out_jsonl) as f:
             for line in f:
                 r = json.loads(line)
-                done[r["key"]] = r
+                if r.get("error"):          # risposta fallita (es. CUDA OOM): va rifatta
+                    done.pop(r["key"], None)
+                else:
+                    done[r["key"]] = r
         if verbose and done:
             print(f"  ripresa: {len(done)} risposte gia' presenti")
 
