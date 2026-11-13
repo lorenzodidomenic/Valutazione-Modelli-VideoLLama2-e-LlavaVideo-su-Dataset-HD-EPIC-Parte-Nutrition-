@@ -10,6 +10,7 @@ ognuna contenente panel_width * panel_height frame consecutivi.
 """
 
 import os
+import shutil
 import numpy as np
 import cv2
 from PIL import Image
@@ -70,7 +71,7 @@ def stack_frames_grid(video, panel_width, panel_height, border_px):
 
 
 def load_video_paneled(video_path, C=32, panel_width=2, panel_height=2,
-                       border_px=0, fps_limit=1, verbose=False):
+                       border_px=0, fps_limit=1, verbose=False, max_failed=0.02):
     """
     Carica un video e applica il Video Panels method.
 
@@ -85,10 +86,13 @@ def load_video_paneled(video_path, C=32, panel_width=2, panel_height=2,
         border_px (int): bordo in pixel (default 0 come nel paper)
         fps_limit (int): gamma proporzionale - secondi minimi tra frame campionati
         verbose (bool): stampa info di debug
+        max_failed (float): frazione massima di frame illeggibili tollerata. Oltre,
+            il video e' considerato corrotto (es. file troncato) e si alza IOError.
 
     Returns:
         frames (np.ndarray): array di shape (C, H, W, 3)
         was_paneled (bool): True se il paneling è stato applicato
+        n_failed (int): frame illeggibili, sostituiti con il frame valido piu' vicino
     """
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
@@ -106,37 +110,50 @@ def load_video_paneled(video_path, C=32, panel_width=2, panel_height=2,
         """
         Legge i frame scorrendo il video sequenzialmente (molto più veloce del seek random).
         Salta i frame non necessari con grab() invece di read().
+
+        Un frame che non si legge NON diventa piu' un frame nero silenzioso: viene
+        contato e, se sono pochi (tipicamente gli ultimi, quando CAP_PROP_FRAME_COUNT
+        sovrastima la lunghezza), sostituito con il frame valido piu' vicino. Se sono
+        troppi il file e' corrotto o troncato e si alza IOError, cosi' i pannelli non
+        vengono scritti e la domanda risulta esclusa nel pre-flight invece di essere
+        valutata su pannelli neri.
         """
-        indices_set = set(indices)
-        idx_to_pos = {idx: i for i, idx in enumerate(indices)}
-        h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        idx_to_pos = {}
+        for pos, idx in enumerate(indices):          # gli indici possono ripetersi
+            idx_to_pos.setdefault(idx, []).append(pos)
         frames = [None] * len(indices)
 
         cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
         max_idx = max(indices)
 
         for frame_num in range(max_idx + 1):
-            if frame_num in indices_set:
+            if frame_num in idx_to_pos:
                 ret, frame = cap.read()
-                if ret:
-                    frames[idx_to_pos[frame_num]] = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                else:
-                    frames[idx_to_pos[frame_num]] = np.zeros((h, w, 3), dtype=np.uint8)
-            else:
-                cap.grab()  # salta il frame senza decodificarlo
+                if not ret:
+                    break                            # stream finito o corrotto
+                rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                for pos in idx_to_pos[frame_num]:
+                    frames[pos] = rgb
+            elif not cap.grab():                     # salta il frame senza decodificarlo
+                break
 
-        # Riempi eventuali None rimasti
-        for i in range(len(frames)):
-            if frames[i] is None:
-                frames[i] = np.zeros((h, w, 3), dtype=np.uint8)
+        failed = [i for i, f in enumerate(frames) if f is None]
+        if len(failed) > max_failed * len(frames):
+            raise IOError(f"{len(failed)}/{len(frames)} frame illeggibili in {video_path} "
+                          f"(file corrotto o troncato?)")
+        if failed:
+            valid = [i for i, f in enumerate(frames) if f is not None]
+            for i in failed:
+                frames[i] = frames[min(valid, key=lambda v: abs(v - i))]
+            print(f"  ATTENZIONE {os.path.basename(video_path)}: {len(failed)}/{len(frames)} "
+                  f"frame illeggibili, sostituiti con il frame valido piu' vicino")
 
-        return np.array(frames)
+        return np.array(frames), len(failed)
 
     if (D > offset * C_total) and (panel_width * panel_height > 1):
         # PANELING: il video è lungo abbastanza
         uniform_sampled_frames = np.linspace(0, D - 1, C_total, dtype=int)
-        spare_frames = read_frames_sequential(cap, uniform_sampled_frames.tolist(), D)
+        spare_frames, n_failed = read_frames_sequential(cap, uniform_sampled_frames.tolist(), D)
 
         spare_frames = stack_frames_grid(spare_frames, panel_width, panel_height, border_px)
 
@@ -144,17 +161,17 @@ def load_video_paneled(video_path, C=32, panel_width=2, panel_height=2,
             print(f"  Paneled: {spare_frames.shape}, grid={panel_width}x{panel_height}, "
                   f"D={D}, fps={fps:.1f}, durata={D/fps:.1f}s")
         cap.release()
-        return spare_frames, True
+        return spare_frames, True, n_failed
     else:
         # SAMPLING NORMALE: video troppo corto per il paneling
         uniform_sampled_frames = np.linspace(0, D - 1, C_original, dtype=int)
-        spare_frames = read_frames_sequential(cap, uniform_sampled_frames.tolist(), D)
+        spare_frames, n_failed = read_frames_sequential(cap, uniform_sampled_frames.tolist(), D)
 
         if verbose:
             print(f"  Normal sampling: {spare_frames.shape}, D={D}, "
                   f"durata={D/fps:.1f}s (troppo corto per paneling)")
         cap.release()
-        return spare_frames, False
+        return spare_frames, False, n_failed
 
 
 def save_panels_to_disk(frames, output_dir, video_name, was_paneled):
@@ -170,6 +187,10 @@ def save_panels_to_disk(frames, output_dir, video_name, was_paneled):
         video_name (str): nome base del video (senza estensione)
         was_paneled (bool): se il paneling è stato applicato
     """
+    # svuota la cartella: un run precedente (pannelli corrotti, o frame singoli del
+    # fallback) lascerebbe file che build_panels_index mescolerebbe con i nuovi
+    if os.path.isdir(output_dir):
+        shutil.rmtree(output_dir)
     os.makedirs(output_dir, exist_ok=True)
 
     for i, frame in enumerate(frames):
@@ -196,6 +217,7 @@ def process_video_folders(tasks_dict, C=32, panel_width=2, panel_height=2,
         verbose (bool): output dettagliato
     """
     stats = {"paneled": 0, "normal": 0, "errors": 0}
+    fallback, failed, repaired = [], [], []   # nomi dei video, stampati nel riepilogo
 
     for task_name, paths in tasks_dict.items():
         input_dir = paths["video_dir"]
@@ -223,7 +245,7 @@ def process_video_folders(tasks_dict, C=32, panel_width=2, panel_height=2,
             video_output_dir = os.path.join(output_base, video_name)
 
             try:
-                frames, was_paneled = load_video_paneled(
+                frames, was_paneled, n_failed = load_video_paneled(
                     video_path, C=C,
                     panel_width=panel_width,
                     panel_height=panel_height,
@@ -238,17 +260,32 @@ def process_video_folders(tasks_dict, C=32, panel_width=2, panel_height=2,
                     stats["paneled"] += 1
                 else:
                     stats["normal"] += 1
+                    fallback.append(video_name)
+                if n_failed:
+                    repaired.append(f"{video_name} ({n_failed} frame)")
 
             except Exception as e:
                 print(f"\n  ERRORE con {video_file}: {e}")
                 stats["errors"] += 1
+                failed.append(video_name)
+                # niente pannelli vecchi o parziali: la domanda va esclusa nel pre-flight
+                shutil.rmtree(video_output_dir, ignore_errors=True)
 
     print(f"\n{'='*60}")
     print(f"RIEPILOGO:")
     print(f"  Pannellati: {stats['paneled']}")
     print(f"  Sampling normale (video corti): {stats['normal']}")
     print(f"  Errori: {stats['errors']}")
+    if fallback:
+        # cartelle con frame singoli invece che pannelli: l'inferenza le tratta come
+        # pannelli, quindi quelle domande NON sono un vero confronto video vs panels
+        print(f"  Video in sampling normale (frame singoli, non pannelli): {', '.join(fallback)}")
+    if repaired:
+        print(f"  Video con pochi frame illeggibili (sostituiti): {', '.join(repaired)}")
+    if failed:
+        print(f"  Video scartati (corrotti, cartella rimossa): {', '.join(failed)}")
     print(f"{'='*60}")
+    return stats, fallback, failed
 
 
 # =====================================================================

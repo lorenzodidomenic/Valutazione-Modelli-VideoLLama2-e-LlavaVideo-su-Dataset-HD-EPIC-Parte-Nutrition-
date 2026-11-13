@@ -129,7 +129,8 @@ di nuovo e verificati con il checksum MD5 pubblicato insieme al dataset.
 
 I video originali durano in media circa 16 minuti, il che li
 rende non facilmente utilizzabili
-nell'ambiente di esecuzione. Ogni video è quindi stato ridotto a 128
+nell'ambiente di esecuzione. Ogni video di \texttt{video\_nutrition\allowbreak\_estimation}, la cui
+domanda riguarda l'intera ricetta, è quindi stato ridotto a 128
 frame, scelti in modo uniforme su tutta la sua durata e riscritti come
 video a 1~fps alla risoluzione originale di $1408\times1408$ pixel. La copertura
 temporale resta quella dell'intero video, mentre la densità di campionamento
@@ -146,6 +147,23 @@ indicato nelle annotazioni. Per non dover scaricare per intero i 47 video
 coinvolti (circa 58~GB), i frame sono stati letti direttamente dal repository
 pubblico del dataset, scaricando solo la porzione di file attorno a ciascun
 timestamp.
+
+\subsection{Estrazione delle clip per \texttt{nutrition\_change}}
+
+Anche \textbf{nutrition\allowbreak\_change} non usa i video sottocampionati. Ogni
+domanda indica un intervallo \texttt{start\_time}--\texttt{end\_time}, lungo da 1 a
+27 secondi (mediana 7), all'interno di video che durano decine di minuti, e
+secondo la documentazione ufficiale del benchmark l'input della domanda è la
+\emph{clip} corrispondente, non il video intero. Nel video a 128 frame
+l'intervallo cadrebbe quasi sempre fra due frame consecutivi e il modello non
+vedrebbe nulla del cambiamento richiesto. Per ciascuna delle 50 domande è quindi
+stata decodificata, sempre leggendo dal repository pubblico, solo la porzione di
+video compresa nell'intervallo, e ne sono stati salvati 128 frame uniformi
+(ridimensionati a $768\times768$ pixel, comunque sopra la risoluzione di lavoro
+dei due modelli). Le clip più brevi di 128 frame, cioè sotto i 4 secondi circa,
+contengono frame ripetuti; ciascun modello ne seleziona poi in modo uniforme il
+numero che usa. Il testo della domanda resta quello originale, con i timestamp
+assoluti.
 
 \subsection{Generazione dei pannelli}
 \label{sec:panels-gen}
@@ -274,7 +292,9 @@ preparati a monte, il modello ne vede effettivamente otto. Lo stesso non vale
 per una lista di immagini, che il preprocessore carica per intero fino a un
 massimo di 32 elementi: per i pannelli la lista viene quindi sottocampionata
 uniformemente a 8 prima di passarla al modello, così che riceva lo stesso
-numero di elementi visivi nelle due condizioni.
+numero di elementi visivi nelle due condizioni. Una lista più corta, come i
+cinque frame di \texttt{image\_nutrition\_estimation}, viene invece completata
+dal preprocessore con frame neri fino a 8.
 
 \textbf{LLaVA-Video 7B}~\cite{llavavideo} è stato caricato tramite il loader
 ufficiale in precisione \texttt{bfloat16} con attenzione \texttt{sdpa}. A
@@ -354,11 +374,6 @@ prototipo i modelli non stanno rispondendo alla domanda: stanno seguendo una
 preferenza a priori sul formato. È coerente con la natura del compito, che
 richiede di leggere valori numerici su una bilancia digitale in un intervallo di
 pochi secondi e di sceglierne la variazione fra cinque quaterne di numeri simili.
-A questo si aggiunge che il modello riceve frame campionati uniformemente su
-tutto il video senza l'indicazione dell'istante a cui ciascuno corrisponde:
-i timestamp citati nella domanda non sono quindi collegabili ai frame, e
-un intervallo di pochi secondi in un video di un quarto d'ora quasi sempre non
-cade su nessuno dei frame ricevuti.
 
 \textbf{Il prototipo \texttt{video\_nutrition\allowbreak\_estimation} è molto sopra la media
 di categoria}, con il 66\% per VideoLLaMA~2 e il 68\% per LLaVA-Video. Una spiegazione
@@ -370,10 +385,17 @@ carboidrati della cipolla non richiede evidenza visiva.
 caso}, con il 28\% e il 26\%. Ogni domanda chiede quale dei cinque ingredienti
 inquadrati abbia più calorie, grassi, carboidrati o proteine, e anche qui le
 opzioni sono nomi di ingredienti. Il divario con il prototipo precedente
-suggerisce che la sola conoscenza linguistica non basti: un'ipotesi plausibile,
-non verificata in questo lavoro, è che i valori nutrizionali delle annotazioni
-si riferiscano alla quantità effettivamente usata nella ricetta, visibile solo
-nelle immagini, e non all'ingrediente in astratto.
+suggerisce che la sola conoscenza linguistica non basti, e i metadati delle
+annotazioni lo confermano. Per ogni opzione riportano la quantità usata nella
+ricetta, i valori nutrizionali riferiti a quella quantità e il rapporto fra i
+due. In tutte le 100 domande la risposta corretta è l'ingrediente con il valore
+assoluto più alto, che è anche quello usato in quantità maggiore, e in nessuna
+è quello con il rapporto più alto, cioè l'ingrediente nutrizionalmente più
+denso. Se la scelta delle opzioni fosse indipendente dalla densità ci si
+aspetterebbe una coincidenza in circa una domanda su cinque: il prototipo è
+quindi costruito in modo che la conoscenza generale sugli ingredienti porti
+fuori strada, e l'unica via per rispondere è stimare dalle immagini la quantità
+effettivamente usata.
 
 \section{Esperimento 2: Valutazione dei VLM con la tecnica dei Video Panels}
 \label{sec:panels}
@@ -396,10 +418,14 @@ casi il modello riceve lo stesso numero di elementi visivi nelle due condizioni 
 quadruplica la copertura temporale passando ai pannelli; cambia il regime
 assoluto in cui la cosa avviene.
 
-L'esperimento è limitato ai due prototipi basati su video, per un totale di 99
-domande valutate. \textbf{image\_nutrition\allowbreak\_estimation} è escluso in quanto il suo input è costituito da cinque frame isolati provenienti
+L'esperimento è limitato a \textbf{video\_nutrition\allowbreak\_estimation}, per un
+totale di 50 domande valutate. \textbf{image\_nutrition\allowbreak\_estimation} è
+escluso in quanto il suo input è costituito da cinque frame isolati provenienti
 da cinque video diversi, quindi non esiste alcuna sequenza temporale da
-impacchettare e il metodo non è applicabile.
+impacchettare. \textbf{nutrition\allowbreak\_change} è escluso perché il suo input è
+una clip di 1--27 secondi: il metodo applica i pannelli solo quando il video è più
+lungo di $\gamma \cdot C \cdot \alpha \cdot \beta = 128$ secondi, e al di sotto
+ricade sul campionamento ordinario, cioè sullo stesso input del baseline.
 
 \subsection{Risultati}
 
@@ -465,9 +491,10 @@ e i due modelli rimangono vicini al livello casuale.
 I risultati vanno letti tenendo presenti alcuni limiti, che riguardano sia i dati
 sia il disegno sperimentale.
 
-\textbf{Dati.} I video sono stati sottocampionati a 128 fotogrammi anziché usati
-per intero, per i due prototipi basati su video; solo
-\texttt{image\_nutrition\_estimation} usa i frame originali agli istanti
+\textbf{Dati.} I video di \texttt{video\_nutrition\_estimation} sono stati
+sottocampionati a 128 fotogrammi anziché usati per intero;
+\texttt{nutrition\_change} usa 128 fotogrammi della sola clip indicata dalla
+domanda e \texttt{image\_nutrition\_estimation} i frame originali agli istanti
 indicati dalle annotazioni. L'insieme di valutazione coincide invece con quello
 originale: tutte le 200 domande sono state valutate.
 
@@ -475,11 +502,24 @@ originale: tutte le 200 domande sono state valutate.
 VideoLLaMA~2, 32 per LLaVA-Video), per cui il confronto diretto fra i due
 modelli mescola l'effetto dell'architettura con quello della quantità di input.
 
+\textbf{Input a immagini.} In \texttt{image\_nutrition\_estimation} l'immagine
+$i$ mostra sempre l'ingrediente dell'opzione $i$ (verificato su tutte le 100
+domande), ma il prompt, come nel paper, non lo dice: il modello deve riconoscere
+l'ingrediente in ciascuna immagine oltre a stimarne la quantità. Le cinque
+immagini, inoltre, arrivano ai modelli come se fossero un video. Per
+VideoLLaMA~2 questo ha una conseguenza ulteriore: il suo connettore
+visione-linguaggio (STC) applica una convoluzione 3D con passo temporale 2, per
+cui gli 8 elementi in ingresso (cinque immagini e tre frame neri di
+riempimento) vengono fusi a coppie e la seconda e la terza immagine, così come la
+quarta e la quinta, finiscono negli stessi token visivi. Si è scelto di non
+intervenire, per restare fedeli al protocollo con cui sono stati ottenuti i
+valori di riferimento, ma il risultato di VideoLLaMA~2 su questo prototipo va
+letto come limitato anche dall'architettura.
+
 \textbf{Riferimento temporale.} Le domande di \texttt{nutrition\_change} citano
-due istanti precisi del video, ma i modelli ricevono frame campionati
-uniformemente senza l'indicazione del tempo corrispondente; in questo protocollo
-il prototipo misura quindi anche la capacità di collegare i timestamp della
-domanda a frame che quasi sempre non li contengono.
+due istanti assoluti del video, mentre i modelli ricevono i frame della sola
+clip, senza l'indicazione del tempo a cui corrispondono: il modello deve
+assumere che la clip ricevuta sia l'intervallo citato.
 
 \textbf{Ambito.} Il lavoro copre una sola delle sette categorie del benchmark.
 Le conclusioni valgono per \emph{Nutrition} e non sono estendibili alle altre
@@ -487,7 +527,7 @@ senza ulteriori esperimenti.
 
 \subsection{Sviluppi possibili}
 
-Si individuano tre direzioni. La prima è
+Si individuano due direzioni. La prima è
 eseguire un \textbf{baseline testuale}, cioè sottoporre le stesse domande a un
 modello senza accesso al video: è la misura che manca per stabilire quanta parte
 dell'accuracy su \texttt{video\_nutrition\_estimation} dipenda da conoscenza
@@ -495,9 +535,7 @@ linguistica anziché da comprensione visiva, ipotesi che qui resta formulata ma
 non verificata. La seconda è variare la geometria dei pannelli, in particolare
 verso griglie più grandi su un modello con finestra di contesto ampia, per capire
 se il compromesso fra risoluzione spaziale e temporale abbia un punto ottimale
-diverso su questo dominio. La terza è applicare i panels non all'intero video
-ma solo alle parti del video più rilevanti per rispondere alla domanda, per
-esempio l'intervallo indicato nelle domande di \texttt{nutrition\_change}.
+diverso su questo dominio.
 
 \subsection{Conclusioni}
 

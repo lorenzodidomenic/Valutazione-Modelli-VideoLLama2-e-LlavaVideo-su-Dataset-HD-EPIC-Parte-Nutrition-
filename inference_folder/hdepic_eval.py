@@ -11,11 +11,13 @@ Protocollo (fedele al paper HD-EPIC):
   - domande a 5 scelte, risposta come LETTERA (A-E)
   - accuracy di categoria = MEDIA DELLE ACCURACY PER PROTOTIPO
   - le domande con file mancanti o corrotti sono ESCLUSE, non contate sbagliate
+  - un input con start_time/end_time e' la CLIP in quella finestra, non il video
+    intero (README ufficiale: "one or more videos, one or more clips")
 """
 import json, os, re, glob, unicodedata
 import pandas as pd
 
-VERSION = "1.0"
+VERSION = "1.1"
 LETTERS = "ABCDEFGH"
 
 # Valori di riferimento del paper HD-EPIC (Tab. 2, colonna Nutrition, % accuracy)
@@ -35,6 +37,16 @@ TASK_FILES = {
     "image_nutrition_estimation": ("nutrition_image_nutrition_estimation.json", "images"),
 }
 VIDEO_TASKS = [t for t, (_, m) in TASK_FILES.items() if m == "video"]
+
+# Task i cui input sono clip [start_time, end_time] (da 1 a 27 s per nutrition_change).
+# I fotogrammi vengono estratti a monte da preprocessing_folder/extract_clip_frames.py.
+CLIP_TASKS = ["nutrition_change"]
+
+# Task su cui ha senso l'esperimento Video Panels. Il paper applica i pannelli solo
+# se il video dura piu' di gamma*C*alpha*beta = 1 s * 32 * 2 * 2 = 128 s; sotto
+# soglia usa il campionamento normale. Le clip di nutrition_change (max 27 s) sono
+# tutte sotto soglia, quindi il task e' escluso.
+PANEL_TASKS = [t for t in VIDEO_TASKS if t not in CLIP_TASKS]
 
 
 # ============================================================ indici dei file
@@ -89,6 +101,24 @@ def hhmmss_to_sec(t):
     """'00:13:43.393' -> 823.393"""
     h, m, s = t.split(":")
     return int(h) * 3600 + int(m) * 60 + float(s)
+
+
+def clip_name(video_id, start, end):
+    """Nome della cartella di una clip (identico a extract_clip_frames.clip_name)."""
+    return f"{video_id}_{int(round(start*1000)):09d}_{int(round(end*1000)):09d}"
+
+
+def clip_frames(clip_cache, inp):
+    """-> fotogrammi ordinati della clip di un input con start/end ([] se assenti)."""
+    if not clip_cache:
+        return []
+    d = os.path.join(clip_cache, clip_name(inp["id"], hhmmss_to_sec(inp["start_time"]),
+                                           hhmmss_to_sec(inp["end_time"])))
+    return sorted(glob.glob(os.path.join(d, "frame_*.jpg")))
+
+
+def _is_clip(inp):
+    return "start_time" in inp and "end_time" in inp
 
 
 def load_annotations(ann_dir, task):
@@ -207,11 +237,11 @@ def frame_path(frame_cache, video_id, sec):
 
 
 def _required_inputs(item, task, index, panels_index, input_mode, prefer,
-                     frame_cache=None):
+                     frame_cache=None, clip_cache=None):
     """-> [(video_id, risorsa)] necessaria a rispondere alla domanda.
 
     `risorsa` e' un path mp4, un path jpg gia' in cache, una lista di path di
-    pannelli, o None se assente.
+    pannelli o di fotogrammi di una clip, o None se assente.
     """
     modality = TASK_FILES[task][1]
     out = []
@@ -231,22 +261,30 @@ def _required_inputs(item, task, index, panels_index, input_mode, prefer,
             out.append((inp["id"], (panels_index or {}).get(inp["id"])))
     else:
         for inp in item["inputs"].values():
-            path, _ = resolve_video(inp["id"], index, prefer=prefer)
-            out.append((inp["id"], path))
+            if _is_clip(inp):
+                # solo la finestra della domanda: mai il video intero o il _sampled,
+                # che coprono minuti di video e quasi sempre mancano l'intervallo
+                out.append((inp["id"], clip_frames(clip_cache, inp)))
+            else:
+                path, _ = resolve_video(inp["id"], index, prefer=prefer)
+                out.append((inp["id"], path))
     return out
 
 
 def usable_items(ann_dir, task, index, panels_index=None, input_mode="video",
-                 prefer="sampled", cache=None, frame_cache=None):
+                 prefer="sampled", cache=None, frame_cache=None, clip_cache=None):
     """Divide le domande in (utilizzabili, scartate-con-motivo)."""
+    if input_mode == "panels" and task not in PANEL_TASKS:
+        raise ValueError(f"{task}: Video Panels non applicabile (clip sotto la soglia "
+                         f"di 128 s del paper). Usare tasks=H.PANEL_TASKS.")
     ann = load_annotations(ann_dir, task)
     ok, skipped = {}, {}
     for key, item in ann.items():
         bad = []
         for vid, res in _required_inputs(item, task, index, panels_index,
-                                         input_mode, prefer, frame_cache):
-            if isinstance(res, list):          # pannelli: ne basta almeno uno
-                if not res:
+                                         input_mode, prefer, frame_cache, clip_cache):
+            if isinstance(res, list):          # pannelli o fotogrammi di una clip
+                if not res or any(os.path.getsize(p) == 0 for p in res):
                     bad.append(vid)
             elif isinstance(res, str) and res.endswith(".jpg"):  # frame in cache
                 if os.path.getsize(res) == 0:
@@ -261,17 +299,18 @@ def usable_items(ann_dir, task, index, panels_index=None, input_mode="video",
 
 
 def preflight(ann_dir, index, tasks=None, panels_index=None, input_mode="video",
-              prefer="sampled", cache=None, frame_cache=None):
+              prefer="sampled", cache=None, frame_cache=None, clip_cache=None):
     """Tabella di copertura reale. Da stampare SEMPRE prima di un run."""
     cache = {} if cache is None else cache
     rows, details = [], {}
     for task in (tasks or list(TASK_FILES)):
         ann = load_annotations(ann_dir, task)
         ok, skipped = usable_items(ann_dir, task, index, panels_index,
-                                   input_mode, prefer, cache, frame_cache)
+                                   input_mode, prefer, cache, frame_cache, clip_cache)
         details[task] = skipped
         rows.append({"task": task,
-                     "input": "frames" if TASK_FILES[task][1] == "images" else input_mode,
+                     "input": ("frames" if TASK_FILES[task][1] == "images"
+                               else "clip" if task in CLIP_TASKS else input_mode),
                      "domande": len(ann),
                      "utilizzabili": len(ok),
                      "scartate": len(skipped),
@@ -322,7 +361,7 @@ def extract_frame(video_path, sec, out_path):
 
 
 def _visual_input(item, task, index, panels_index, input_mode, prefer,
-                  frame_extractor, frame_cache):
+                  frame_extractor, frame_cache, clip_cache=None):
     """Prepara cio' che va passato al modello -> (input, etichetta sorgente)."""
     if TASK_FILES[task][1] == "images":
         paths = []
@@ -335,7 +374,10 @@ def _visual_input(item, task, index, panels_index, input_mode, prefer,
                 (frame_extractor or extract_frame)(video, sec, out)
             paths.append(out)
         return paths, "frames"
-    vid = item["inputs"]["video 1"]["id"]
+    inp = item["inputs"]["video 1"]
+    vid = inp["id"]
+    if _is_clip(inp):
+        return clip_frames(clip_cache, inp), "clip"
     if input_mode == "panels":
         return panels_index[vid], "panels"
     path, src = resolve_video(vid, index, prefer=prefer)
@@ -346,14 +388,14 @@ def _visual_input(item, task, index, panels_index, input_mode, prefer,
 def run_task(task, ann_dir, index, infer_fn, out_jsonl, panels_index=None,
              input_mode="video", prefer="sampled", system=None,
              frame_extractor=None, frame_cache=None, limit=None,
-             verbose=True, readable_cache=None):
+             verbose=True, readable_cache=None, clip_cache=None):
     """Inferenza su un task, con ripresa da dove si era interrotto.
 
     Ogni risposta viene scritta su `out_jsonl` subito: se Colab si disconnette,
     rilanciare la cella riprende senza rifare le domande gia' fatte.
     """
     ann, skipped = usable_items(ann_dir, task, index, panels_index,
-                                input_mode, prefer, readable_cache, frame_cache)
+                                input_mode, prefer, readable_cache, frame_cache, clip_cache)
     if frame_cache:
         os.makedirs(frame_cache, exist_ok=True)
     if verbose:
@@ -387,7 +429,7 @@ def run_task(task, ann_dir, index, infer_fn, out_jsonl, panels_index=None,
                "n_choices": len(choices), "correct_idx": correct}
         try:
             visual, src = _visual_input(item, task, index, panels_index, input_mode,
-                                        prefer, frame_extractor, frame_cache)
+                                        prefer, frame_extractor, frame_cache, clip_cache)
             response = infer_fn(visual, build_prompt(question, choices, system=system))
             idx, method = parse_answer(response, choices)
             rec.update(source=src, response=response, predicted_idx=idx,
