@@ -268,9 +268,13 @@ sostituirla con l'implementazione \emph{eager} per rendere il modello
 eseguibile. L'input visivo passa sempre dal preprocessore del repository, che
 applica ridimensionamento a $336\times336$, normalizzazione CLIP e padding, sia
 che riceva il percorso di un video sia che riceva una lista di immagini. Un
-dettaglio rilevante è che il preprocessore ricampiona l'input a
+dettaglio rilevante è che il preprocessore ricampiona un video a
 \texttt{num\_frames}, il cui valore di default è \textbf{8}: dei 128 frame
-preparati a monte, il modello ne vede effettivamente otto.
+preparati a monte, il modello ne vede effettivamente otto. Lo stesso non vale
+per una lista di immagini, che il preprocessore carica per intero fino a un
+massimo di 32 elementi: per i pannelli la lista viene quindi sottocampionata
+uniformemente a 8 prima di passarla al modello, così che riceva lo stesso
+numero di elementi visivi nelle due condizioni.
 
 \textbf{LLaVA-Video 7B}~\cite{llavavideo} è stato caricato tramite il loader
 ufficiale in precisione \texttt{bfloat16} con attenzione \texttt{sdpa}. A
