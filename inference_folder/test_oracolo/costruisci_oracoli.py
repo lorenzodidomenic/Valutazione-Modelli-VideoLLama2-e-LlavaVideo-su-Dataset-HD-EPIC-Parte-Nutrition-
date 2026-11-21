@@ -13,8 +13,8 @@ valore PIU' BASSO. Cosi' l'oracolo e' "molto migliore" ma non assurdo.
 Lo script e' deterministico: rieseguendolo si ottiene lo stesso file.
 
 Input  (dataset):
-  hd-epic-annotations/vqa-benchmark/nutrition_video_nutrition_estimation.json
-  hd-epic-annotations/test_oracolo/dati/complete_recipes.json
+  preprocessing_folder/nutrition_video_nutrition_estimation.json
+  tesi_ipotesi1_video/dati/complete_recipes.json
 Output:
   hd-epic-annotations/test_oracolo/dati/oracoli.json
 """
@@ -23,11 +23,11 @@ import os
 import re
 
 # ----------------------------------------------------------- percorsi
-RADICE = "/Users/lorenzodidomenico/Desktop/PROGETTO DEEP LEARNING 1"
+# radice del progetto: due livelli sopra questo file (inference_folder/test_oracolo/)
+RADICE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DATI_ORACOLO = os.path.join(RADICE, "hd-epic-annotations", "test_oracolo", "dati")
-DOMANDE = os.path.join(RADICE, "hd-epic-annotations", "vqa-benchmark",
-                       "nutrition_video_nutrition_estimation.json")
-RICETTE = os.path.join(DATI_ORACOLO, "complete_recipes.json")
+DOMANDE = os.path.join(RADICE, "preprocessing_folder", "nutrition_video_nutrition_estimation.json")
+RICETTE = os.path.join(RADICE, "tesi_ipotesi1_video", "dati", "complete_recipes.json")
 OUTPUT = os.path.join(DATI_ORACOLO, "oracoli.json")
 
 # ----------------------------------------------------------- regole

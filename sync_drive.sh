@@ -8,7 +8,7 @@
 # Esclusi: ambienti virtuali, cache Python, git, checkpoint Jupyter, video.
 set -euo pipefail
 
-PROG="$HOME/Desktop/PROGETTO DEEP LEARNING 1"
+PROG="$(cd "$(dirname "$0")" && pwd)"   # la cartella del progetto e' quella di questo script
 DRIVE=$(echo "$HOME"/Library/CloudStorage/GoogleDrive-*/"Il mio Drive/Progetto Deep Learning 1")
 [ -d "$DRIVE" ] || { echo "Cartella Drive non trovata: $DRIVE (Google Drive e' aperto?)"; exit 1; }
 

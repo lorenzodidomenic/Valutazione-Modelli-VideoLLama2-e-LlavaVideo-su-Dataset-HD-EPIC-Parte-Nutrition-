@@ -28,9 +28,10 @@ import random
 #   <cartella>/risultati/   un .jsonl per modello e condizione
 # In locale e' hd-epic-annotations/test_oracolo. Su Colab il notebook imposta
 # la variabile TEST_ORACOLO_DIR prima di importare questo file.
+_RADICE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 CARTELLA_ORACOLO = os.environ.get(
     "TEST_ORACOLO_DIR",
-    "/Users/lorenzodidomenico/Desktop/PROGETTO DEEP LEARNING 1/hd-epic-annotations/test_oracolo")
+    os.path.join(_RADICE, "hd-epic-annotations", "test_oracolo"))
 DATI = os.path.join(CARTELLA_ORACOLO, "dati")
 RISULTATI = os.path.join(CARTELLA_ORACOLO, "risultati")
 
