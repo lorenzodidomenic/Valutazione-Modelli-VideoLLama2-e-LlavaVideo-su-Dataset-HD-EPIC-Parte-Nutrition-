@@ -42,6 +42,7 @@ pyvenv.cfg
 .env.*
 *.key
 credentials.json
+chiave_api.txt
 
 # ---------- Dataset video HD-EPIC (decine di GB) ----------
 videos_image_nutrition_estimation/
@@ -86,9 +87,6 @@ runs/
 logs/
 *.log
 wandb/
-
-# ---------- Repository esterno clonato ----------
-preprocessing_folder/hd-epic-downloader/
 
 # ---------- Eccezioni: annotazioni e benchmark vanno versionati ----------
 !hd-epic-annotations/**/*.json

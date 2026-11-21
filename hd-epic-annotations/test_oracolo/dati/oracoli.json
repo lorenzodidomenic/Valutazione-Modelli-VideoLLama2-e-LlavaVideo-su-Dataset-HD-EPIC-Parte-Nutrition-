@@ -1,0 +1,896 @@
+{
+  "regole": {
+    "moltiplicatore_minimo": 2.0,
+    "scelta": "valore piu' basso sopra soglia"
+  },
+  "oracoli": {
+    "nutrition_video_nutrition_estimation_0": {
+      "domanda": "What is the ingredient with highest carbs in this recipe?",
+      "nutriente": "carbs",
+      "ricetta": "P03_R01",
+      "oracolo": "pizza dough",
+      "oracolo_ing_id": "P03_R07_I01",
+      "valore_oracolo": 126.0,
+      "massimo_opzioni": 61.2,
+      "rapporto": 2.06,
+      "opzioni_originali": [
+        "butternut squash",
+        "onions",
+        "spring greens",
+        "split red lentils",
+        "spicy garlic & coconut paste, ginger lentil stock and dhal spice mix"
+      ],
+      "lettera_gold_originale": "D"
+    },
+    "nutrition_video_nutrition_estimation_1": {
+      "domanda": "What is the ingredient with highest fat in this recipe?",
+      "nutriente": "fat",
+      "ricetta": "P03_R02",
+      "oracolo": "biscuits",
+      "oracolo_ing_id": "P01_R05_I04",
+      "valore_oracolo": 71.7,
+      "massimo_opzioni": 35.0,
+      "rapporto": 2.05,
+      "opzioni_originali": [
+        "plant-based burgers",
+        "sunflower oil",
+        "butter",
+        "sour cream",
+        "stroganoff seasoning, mushroom stock and horseradish seasoning"
+      ],
+      "lettera_gold_originale": "A"
+    },
+    "nutrition_video_nutrition_estimation_10": {
+      "domanda": "What is the ingredient with highest calories in this recipe?",
+      "nutriente": "calories",
+      "ricetta": "P08_R07",
+      "oracolo": "flour",
+      "oracolo_ing_id": "P03_R05_I01",
+      "valore_oracolo": 1129.0,
+      "massimo_opzioni": 560.0,
+      "rapporto": 2.02,
+      "opzioni_originali": [
+        "sundried tomato couscous",
+        "cod fishcakes",
+        "salmon fishcakes",
+        "black pepper",
+        "sesame oil"
+      ],
+      "lettera_gold_originale": "C"
+    },
+    "nutrition_video_nutrition_estimation_11": {
+      "domanda": "What is the ingredient with highest carbs in this recipe?",
+      "nutriente": "carbs",
+      "ricetta": "P08_R05",
+      "oracolo": "chopped tomatoes",
+      "oracolo_ing_id": "P05_R01_I15",
+      "valore_oracolo": 29.0,
+      "massimo_opzioni": 14.2,
+      "rapporto": 2.04,
+      "opzioni_originali": [
+        "broccoli",
+        "teriyaki salmon kebabs",
+        "garlic powder",
+        "olive oil cooking spray",
+        "chickpea, spinach & quinoa mix"
+      ],
+      "lettera_gold_originale": "E"
+    },
+    "nutrition_video_nutrition_estimation_12": {
+      "domanda": "What is the ingredient with highest protein in this recipe?",
+      "nutriente": "protein",
+      "ricetta": "P08_R03",
+      "oracolo": "chickpeas",
+      "oracolo_ing_id": "P07_R02_I10",
+      "valore_oracolo": 22.0,
+      "massimo_opzioni": 10.9,
+      "rapporto": 2.02,
+      "opzioni_originali": [
+        "red onions",
+        "eggs",
+        "finger chillies",
+        "fat free cottage cheese",
+        "olive oil cooking spray"
+      ],
+      "lettera_gold_originale": "B"
+    },
+    "nutrition_video_nutrition_estimation_13": {
+      "domanda": "What is the ingredient with highest protein in this recipe?",
+      "nutriente": "protein",
+      "ricetta": "P06_R02",
+      "oracolo": "chicken breasts",
+      "oracolo_ing_id": "P09_R02_I02",
+      "valore_oracolo": 68.0,
+      "massimo_opzioni": 31.2,
+      "rapporto": 2.18,
+      "opzioni_originali": [
+        "whole milk",
+        "sugar",
+        "split red lentils",
+        "coffee",
+        "spring greens"
+      ],
+      "lettera_gold_originale": "A"
+    },
+    "nutrition_video_nutrition_estimation_14": {
+      "domanda": "What is the ingredient with highest fat in this recipe?",
+      "nutriente": "fat",
+      "ricetta": "P08_R03",
+      "oracolo": "teriyaki salmon kebabs",
+      "oracolo_ing_id": "P08_R05_I01",
+      "valore_oracolo": 17.6,
+      "massimo_opzioni": 8.8,
+      "rapporto": 2.0,
+      "opzioni_originali": [
+        "eggs",
+        "finger chillies",
+        "olive oil cooking spray",
+        "red onions",
+        "olive oil"
+      ],
+      "lettera_gold_originale": "A"
+    },
+    "nutrition_video_nutrition_estimation_15": {
+      "domanda": "What is the ingredient with highest protein in this recipe?",
+      "nutriente": "protein",
+      "ricetta": "P09_R01",
+      "oracolo": "minced beef",
+      "oracolo_ing_id": "P08_R08_I08",
+      "valore_oracolo": 155.0,
+      "massimo_opzioni": 70.0,
+      "rapporto": 2.21,
+      "opzioni_originali": [
+        "red curry paste",
+        "chilli",
+        "bamboo shoots",
+        "coconut milk",
+        "chicken breasts"
+      ],
+      "lettera_gold_originale": "E"
+    },
+    "nutrition_video_nutrition_estimation_16": {
+      "domanda": "What is the ingredient with highest fat in this recipe?",
+      "nutriente": "fat",
+      "ricetta": "P08_R05",
+      "oracolo": "coconut milk",
+      "oracolo_ing_id": "P09_R01_I02",
+      "valore_oracolo": 35.6,
+      "massimo_opzioni": 17.6,
+      "rapporto": 2.02,
+      "opzioni_originali": [
+        "teriyaki salmon kebabs",
+        "chickpea, spinach & quinoa mix",
+        "broccoli",
+        "garlic powder",
+        "olive oil cooking spray"
+      ],
+      "lettera_gold_originale": "A"
+    },
+    "nutrition_video_nutrition_estimation_17": {
+      "domanda": "What is the ingredient with highest carbs in this recipe?",
+      "nutriente": "carbs",
+      "ricetta": "P04_R03",
+      "oracolo": "risotto rice",
+      "oracolo_ing_id": "P07_R03_I08",
+      "valore_oracolo": 129.3,
+      "massimo_opzioni": 63.8,
+      "rapporto": 2.03,
+      "opzioni_originali": [
+        "spicy garlic & coconut paste, ginger lentil stock and dhal spice mix",
+        "strawberry granola",
+        "ground cinnamon",
+        "almond milk (unsweetened)",
+        "split red lentils"
+      ],
+      "lettera_gold_originale": "B"
+    },
+    "nutrition_video_nutrition_estimation_18": {
+      "domanda": "What is the ingredient with highest fat in this recipe?",
+      "nutriente": "fat",
+      "ricetta": "P07_R07",
+      "oracolo": "grana padano",
+      "oracolo_ing_id": "P07_R03_I10",
+      "valore_oracolo": 29.0,
+      "massimo_opzioni": 14.0,
+      "rapporto": 2.07,
+      "opzioni_originali": [
+        "parsley",
+        "sweet potatoes",
+        "avocado",
+        "olive oil",
+        "greek yoghurt"
+      ],
+      "lettera_gold_originale": "D"
+    },
+    "nutrition_video_nutrition_estimation_19": {
+      "domanda": "What is the ingredient with highest carbs in this recipe?",
+      "nutriente": "carbs",
+      "ricetta": "P08_R02",
+      "oracolo": "chestnut mushrooms",
+      "oracolo_ing_id": "P07_R03_I06",
+      "valore_oracolo": 21.3,
+      "massimo_opzioni": 10.4,
+      "rapporto": 2.05,
+      "opzioni_originali": [
+        "mixed bean salad",
+        "balsamic glaze",
+        "salt",
+        "cherry tomatoes",
+        "mixed seeds"
+      ],
+      "lettera_gold_originale": "A"
+    },
+    "nutrition_video_nutrition_estimation_2": {
+      "domanda": "What is the ingredient with highest calories in this recipe?",
+      "nutriente": "calories",
+      "ricetta": "P03_R01",
+      "oracolo": "potatoes",
+      "oracolo_ing_id": "P03_R04_I01",
+      "valore_oracolo": 1476.0,
+      "massimo_opzioni": 668.0,
+      "rapporto": 2.21,
+      "opzioni_originali": [
+        "onions",
+        "spicy garlic & coconut paste, ginger lentil stock and dhal spice mix",
+        "sunflower oil",
+        "split red lentils",
+        "coconut milk"
+      ],
+      "lettera_gold_originale": "E"
+    },
+    "nutrition_video_nutrition_estimation_20": {
+      "domanda": "What is the ingredient with highest protein in this recipe?",
+      "nutriente": "protein",
+      "ricetta": "P08_R02",
+      "oracolo": "cocoa powder",
+      "oracolo_ing_id": "P01_R05_I02",
+      "valore_oracolo": 7.8,
+      "massimo_opzioni": 3.7,
+      "rapporto": 2.11,
+      "opzioni_originali": [
+        "balsamic glaze",
+        "mixed seeds",
+        "mixed bean salad",
+        "coriander",
+        "rocket"
+      ],
+      "lettera_gold_originale": "C"
+    },
+    "nutrition_video_nutrition_estimation_21": {
+      "domanda": "What is the ingredient with highest protein in this recipe?",
+      "nutriente": "protein",
+      "ricetta": "P03_R02",
+      "oracolo": "chicken breasts",
+      "oracolo_ing_id": "P09_R02_I02",
+      "valore_oracolo": 68.0,
+      "massimo_opzioni": 32.0,
+      "rapporto": 2.12,
+      "opzioni_originali": [
+        "plant-based burgers",
+        "stroganoff seasoning, mushroom stock and horseradish seasoning",
+        "tomato puree",
+        "onions",
+        "chestnut mushrooms"
+      ],
+      "lettera_gold_originale": "A"
+    },
+    "nutrition_video_nutrition_estimation_22": {
+      "domanda": "What is the ingredient with highest carbs in this recipe?",
+      "nutriente": "carbs",
+      "ricetta": "P07_R07",
+      "oracolo": "strawberry granola",
+      "oracolo_ing_id": "P04_R03_I01",
+      "valore_oracolo": 63.8,
+      "massimo_opzioni": 31.4,
+      "rapporto": 2.03,
+      "opzioni_originali": [
+        "chilli powder",
+        "sweetcorn",
+        "cumin",
+        "black beans",
+        "sweet potatoes"
+      ],
+      "lettera_gold_originale": "E"
+    },
+    "nutrition_video_nutrition_estimation_23": {
+      "domanda": "What is the ingredient with highest protein in this recipe?",
+      "nutriente": "protein",
+      "ricetta": "P08_R07",
+      "oracolo": "chicken thighs",
+      "oracolo_ing_id": "P08_R04_I01",
+      "valore_oracolo": 59.0,
+      "massimo_opzioni": 29.0,
+      "rapporto": 2.03,
+      "opzioni_originali": [
+        "cod fishcakes",
+        "oregano",
+        "salmon fishcakes",
+        "black pepper",
+        "sundried tomato couscous"
+      ],
+      "lettera_gold_originale": "C"
+    },
+    "nutrition_video_nutrition_estimation_24": {
+      "domanda": "What is the ingredient with highest calories in this recipe?",
+      "nutriente": "calories",
+      "ricetta": "P07_R07",
+      "oracolo": "grana padano",
+      "oracolo_ing_id": "P07_R03_I10",
+      "valore_oracolo": 419.0,
+      "massimo_opzioni": 206.0,
+      "rapporto": 2.03,
+      "opzioni_originali": [
+        "greek yoghurt",
+        "avocado",
+        "chilli powder",
+        "cumin",
+        "sweet potatoes"
+      ],
+      "lettera_gold_originale": "E"
+    },
+    "nutrition_video_nutrition_estimation_25": {
+      "domanda": "What is the ingredient with highest calories in this recipe?",
+      "nutriente": "calories",
+      "ricetta": "P08_R03",
+      "oracolo": "peas",
+      "oracolo_ing_id": "P05_R04_I04",
+      "valore_oracolo": 254.0,
+      "massimo_opzioni": 126.0,
+      "rapporto": 2.02,
+      "opzioni_originali": [
+        "eggs",
+        "olive oil",
+        "red onions",
+        "finger chillies",
+        "olive oil cooking spray"
+      ],
+      "lettera_gold_originale": "A"
+    },
+    "nutrition_video_nutrition_estimation_26": {
+      "domanda": "What is the ingredient with highest calories in this recipe?",
+      "nutriente": "calories",
+      "ricetta": "P09_R01",
+      "oracolo": "butter",
+      "oracolo_ing_id": "P07_R04_I01",
+      "valore_oracolo": 932.0,
+      "massimo_opzioni": 445.0,
+      "rapporto": 2.09,
+      "opzioni_originali": [
+        "chicken breasts",
+        "chilli",
+        "vegetable oil",
+        "red curry paste",
+        "coconut milk"
+      ],
+      "lettera_gold_originale": "E"
+    },
+    "nutrition_video_nutrition_estimation_27": {
+      "domanda": "What is the ingredient with highest carbs in this recipe?",
+      "nutriente": "carbs",
+      "ricetta": "P06_R05",
+      "oracolo": "medjool dates",
+      "oracolo_ing_id": "P01_R09_I02",
+      "valore_oracolo": 408.6,
+      "massimo_opzioni": 184.0,
+      "rapporto": 2.22,
+      "opzioni_originali": [
+        "vegetable oil",
+        "spicy garlic & coconut paste, ginger lentil stock and dhal spice mix",
+        "potatoes",
+        "butter",
+        "whole wheat flour"
+      ],
+      "lettera_gold_originale": "E"
+    },
+    "nutrition_video_nutrition_estimation_28": {
+      "domanda": "What is the ingredient with highest calories in this recipe?",
+      "nutriente": "calories",
+      "ricetta": "P07_R07",
+      "oracolo": "grana padano",
+      "oracolo_ing_id": "P07_R03_I10",
+      "valore_oracolo": 419.0,
+      "massimo_opzioni": 206.0,
+      "rapporto": 2.03,
+      "opzioni_originali": [
+        "sweet potatoes",
+        "avocado",
+        "chilli powder",
+        "greek yoghurt",
+        "cumin"
+      ],
+      "lettera_gold_originale": "A"
+    },
+    "nutrition_video_nutrition_estimation_29": {
+      "domanda": "What is the ingredient with highest fat in this recipe?",
+      "nutriente": "fat",
+      "ricetta": "P08_R06",
+      "oracolo": "coconut milk",
+      "oracolo_ing_id": "P03_R01_I05",
+      "valore_oracolo": 68.0,
+      "massimo_opzioni": 27.0,
+      "rapporto": 2.52,
+      "opzioni_originali": [
+        "black pepper",
+        "baby spinach",
+        "olive oil",
+        "tuna",
+        "mixed bean salad"
+      ],
+      "lettera_gold_originale": "C"
+    },
+    "nutrition_video_nutrition_estimation_3": {
+      "domanda": "What is the ingredient with highest calories in this recipe?",
+      "nutriente": "calories",
+      "ricetta": "P08_R05",
+      "oracolo": "beef",
+      "oracolo_ing_id": "P09_R06_I01",
+      "valore_oracolo": 730.0,
+      "massimo_opzioni": 363.0,
+      "rapporto": 2.01,
+      "opzioni_originali": [
+        "oregano",
+        "garlic powder",
+        "olive oil cooking spray",
+        "black pepper",
+        "teriyaki salmon kebabs"
+      ],
+      "lettera_gold_originale": "E"
+    },
+    "nutrition_video_nutrition_estimation_30": {
+      "domanda": "What is the ingredient with highest carbs in this recipe?",
+      "nutriente": "carbs",
+      "ricetta": "P03_R02",
+      "oracolo": "sugar",
+      "oracolo_ing_id": "P07_R04_I02",
+      "valore_oracolo": 196.0,
+      "massimo_opzioni": 98.0,
+      "rapporto": 2.0,
+      "opzioni_originali": [
+        "stroganoff seasoning, mushroom stock and horseradish seasoning",
+        "potatoes",
+        "chestnut mushrooms",
+        "onions",
+        "tomato puree"
+      ],
+      "lettera_gold_originale": "B"
+    },
+    "nutrition_video_nutrition_estimation_31": {
+      "domanda": "What is the ingredient with highest fat in this recipe?",
+      "nutriente": "fat",
+      "ricetta": "P08_R05",
+      "oracolo": "coconut milk",
+      "oracolo_ing_id": "P09_R01_I02",
+      "valore_oracolo": 35.6,
+      "massimo_opzioni": 17.6,
+      "rapporto": 2.02,
+      "opzioni_originali": [
+        "teriyaki salmon kebabs",
+        "garlic powder",
+        "chickpea, spinach & quinoa mix",
+        "broccoli",
+        "olive oil cooking spray"
+      ],
+      "lettera_gold_originale": "A"
+    },
+    "nutrition_video_nutrition_estimation_32": {
+      "domanda": "What is the ingredient with highest calories in this recipe?",
+      "nutriente": "calories",
+      "ricetta": "P03_R02",
+      "oracolo": "pine nuts",
+      "oracolo_ing_id": "P05_R03_I05",
+      "valore_oracolo": 1045.0,
+      "massimo_opzioni": 506.0,
+      "rapporto": 2.07,
+      "opzioni_originali": [
+        "sunflower oil",
+        "butter",
+        "tomato puree",
+        "plant-based burgers",
+        "sour cream"
+      ],
+      "lettera_gold_originale": "D"
+    },
+    "nutrition_video_nutrition_estimation_33": {
+      "domanda": "What is the ingredient with highest protein in this recipe?",
+      "nutriente": "protein",
+      "ricetta": "P06_R05",
+      "oracolo": "chicken breasts",
+      "oracolo_ing_id": "P09_R02_I02",
+      "valore_oracolo": 68.0,
+      "massimo_opzioni": 34.0,
+      "rapporto": 2.0,
+      "opzioni_originali": [
+        "butter",
+        "split red lentils",
+        "whole wheat flour",
+        "potatoes",
+        "vegetable oil"
+      ],
+      "lettera_gold_originale": "C"
+    },
+    "nutrition_video_nutrition_estimation_34": {
+      "domanda": "What is the ingredient with highest protein in this recipe?",
+      "nutriente": "protein",
+      "ricetta": "P06_R05",
+      "oracolo": "chicken breasts",
+      "oracolo_ing_id": "P09_R02_I02",
+      "valore_oracolo": 68.0,
+      "massimo_opzioni": 34.0,
+      "rapporto": 2.0,
+      "opzioni_originali": [
+        "whole wheat flour",
+        "split red lentils",
+        "potatoes",
+        "vegetable oil",
+        "butter"
+      ],
+      "lettera_gold_originale": "A"
+    },
+    "nutrition_video_nutrition_estimation_35": {
+      "domanda": "What is the ingredient with highest carbs in this recipe?",
+      "nutriente": "carbs",
+      "ricetta": "P03_R02",
+      "oracolo": "sugar",
+      "oracolo_ing_id": "P07_R04_I02",
+      "valore_oracolo": 196.0,
+      "massimo_opzioni": 98.0,
+      "rapporto": 2.0,
+      "opzioni_originali": [
+        "stroganoff seasoning, mushroom stock and horseradish seasoning",
+        "potatoes",
+        "tomato puree",
+        "chestnut mushrooms",
+        "onions"
+      ],
+      "lettera_gold_originale": "B"
+    },
+    "nutrition_video_nutrition_estimation_36": {
+      "domanda": "What is the ingredient with highest calories in this recipe?",
+      "nutriente": "calories",
+      "ricetta": "P08_R06",
+      "oracolo": "cashew nuts",
+      "oracolo_ing_id": "P05_R06_I04",
+      "valore_oracolo": 504.0,
+      "massimo_opzioni": 242.0,
+      "rapporto": 2.08,
+      "opzioni_originali": [
+        "balsamic glaze",
+        "mixed bean salad",
+        "tuna",
+        "olive oil",
+        "garlic powder"
+      ],
+      "lettera_gold_originale": "D"
+    },
+    "nutrition_video_nutrition_estimation_37": {
+      "domanda": "What is the ingredient with highest fat in this recipe?",
+      "nutriente": "fat",
+      "ricetta": "P08_R07",
+      "oracolo": "coconut milk",
+      "oracolo_ing_id": "P03_R01_I05",
+      "valore_oracolo": 68.0,
+      "massimo_opzioni": 29.0,
+      "rapporto": 2.34,
+      "opzioni_originali": [
+        "black pepper",
+        "oregano",
+        "sesame oil",
+        "salmon fishcakes",
+        "cod fishcakes"
+      ],
+      "lettera_gold_originale": "D"
+    },
+    "nutrition_video_nutrition_estimation_38": {
+      "domanda": "What is the ingredient with highest carbs in this recipe?",
+      "nutriente": "carbs",
+      "ricetta": "P09_R01",
+      "oracolo": "dried mushrooms",
+      "oracolo_ing_id": "P07_R03_I01",
+      "valore_oracolo": 20.0,
+      "massimo_opzioni": 10.0,
+      "rapporto": 2.0,
+      "opzioni_originali": [
+        "red curry paste",
+        "coconut milk",
+        "chilli",
+        "courgette",
+        "bamboo shoots"
+      ],
+      "lettera_gold_originale": "A"
+    },
+    "nutrition_video_nutrition_estimation_39": {
+      "domanda": "What is the ingredient with highest calories in this recipe?",
+      "nutriente": "calories",
+      "ricetta": "P08_R03",
+      "oracolo": "peas",
+      "oracolo_ing_id": "P05_R04_I04",
+      "valore_oracolo": 254.0,
+      "massimo_opzioni": 126.0,
+      "rapporto": 2.02,
+      "opzioni_originali": [
+        "red onions",
+        "olive oil cooking spray",
+        "finger chillies",
+        "olive oil",
+        "eggs"
+      ],
+      "lettera_gold_originale": "E"
+    },
+    "nutrition_video_nutrition_estimation_40": {
+      "domanda": "What is the ingredient with highest carbs in this recipe?",
+      "nutriente": "carbs",
+      "ricetta": "P08_R03",
+      "oracolo": "chicken breast",
+      "oracolo_ing_id": "P04_R01_I01",
+      "valore_oracolo": 4.9,
+      "massimo_opzioni": 2.3,
+      "rapporto": 2.13,
+      "opzioni_originali": [
+        "olive oil cooking spray",
+        "red onions",
+        "finger chillies",
+        "fat free cottage cheese",
+        "eggs"
+      ],
+      "lettera_gold_originale": "D"
+    },
+    "nutrition_video_nutrition_estimation_41": {
+      "domanda": "What is the ingredient with highest calories in this recipe?",
+      "nutriente": "calories",
+      "ricetta": "P06_R05",
+      "oracolo": "biscuits",
+      "oracolo_ing_id": "P01_R05_I04",
+      "valore_oracolo": 2102.0,
+      "massimo_opzioni": 867.0,
+      "rapporto": 2.42,
+      "opzioni_originali": [
+        "whole wheat flour",
+        "vegetable oil",
+        "split red lentils",
+        "potatoes",
+        "butter"
+      ],
+      "lettera_gold_originale": "A"
+    },
+    "nutrition_video_nutrition_estimation_42": {
+      "domanda": "What is the ingredient with highest calories in this recipe?",
+      "nutriente": "calories",
+      "ricetta": "P08_R07",
+      "oracolo": "flour",
+      "oracolo_ing_id": "P03_R05_I01",
+      "valore_oracolo": 1129.0,
+      "massimo_opzioni": 560.0,
+      "rapporto": 2.02,
+      "opzioni_originali": [
+        "sundried tomato couscous",
+        "sesame oil",
+        "black pepper",
+        "cod fishcakes",
+        "salmon fishcakes"
+      ],
+      "lettera_gold_originale": "E"
+    },
+    "nutrition_video_nutrition_estimation_43": {
+      "domanda": "What is the ingredient with highest protein in this recipe?",
+      "nutriente": "protein",
+      "ricetta": "P03_R01",
+      "oracolo": "chicken breasts",
+      "oracolo_ing_id": "P09_R02_I02",
+      "valore_oracolo": 68.0,
+      "massimo_opzioni": 31.2,
+      "rapporto": 2.18,
+      "opzioni_originali": [
+        "split red lentils",
+        "spicy garlic & coconut paste, ginger lentil stock and dhal spice mix",
+        "onions",
+        "butternut squash",
+        "spring greens"
+      ],
+      "lettera_gold_originale": "A"
+    },
+    "nutrition_video_nutrition_estimation_44": {
+      "domanda": "What is the ingredient with highest protein in this recipe?",
+      "nutriente": "protein",
+      "ricetta": "P08_R05",
+      "oracolo": "beef",
+      "oracolo_ing_id": "P09_R04_I01",
+      "valore_oracolo": 90.0,
+      "massimo_opzioni": 41.2,
+      "rapporto": 2.18,
+      "opzioni_originali": [
+        "garlic powder",
+        "olive oil cooking spray",
+        "chickpea, spinach & quinoa mix",
+        "teriyaki salmon kebabs",
+        "broccoli"
+      ],
+      "lettera_gold_originale": "D"
+    },
+    "nutrition_video_nutrition_estimation_45": {
+      "domanda": "What is the ingredient with highest carbs in this recipe?",
+      "nutriente": "carbs",
+      "ricetta": "P03_R01",
+      "oracolo": "pizza dough",
+      "oracolo_ing_id": "P03_R07_I01",
+      "valore_oracolo": 126.0,
+      "massimo_opzioni": 61.2,
+      "rapporto": 2.06,
+      "opzioni_originali": [
+        "butternut squash",
+        "onions",
+        "spring greens",
+        "spicy garlic & coconut paste, ginger lentil stock and dhal spice mix",
+        "split red lentils"
+      ],
+      "lettera_gold_originale": "E"
+    },
+    "nutrition_video_nutrition_estimation_46": {
+      "domanda": "What is the ingredient with highest calories in this recipe?",
+      "nutriente": "calories",
+      "ricetta": "P08_R09",
+      "oracolo": "sugar",
+      "oracolo_ing_id": "P05_R05_I04",
+      "valore_oracolo": 248.0,
+      "massimo_opzioni": 123.0,
+      "rapporto": 2.02,
+      "opzioni_originali": [
+        "ginger",
+        "crispy chilli oil",
+        "cucumber",
+        "garlic",
+        "sesame oil"
+      ],
+      "lettera_gold_originale": "E"
+    },
+    "nutrition_video_nutrition_estimation_47": {
+      "domanda": "What is the ingredient with highest protein in this recipe?",
+      "nutriente": "protein",
+      "ricetta": "P08_R09",
+      "oracolo": "egg yolk",
+      "oracolo_ing_id": "P05_R04_I11",
+      "valore_oracolo": 5.5,
+      "massimo_opzioni": 2.6,
+      "rapporto": 2.12,
+      "opzioni_originali": [
+        "cucumber",
+        "soy sauce",
+        "garlic",
+        "ginger",
+        "crispy chilli oil"
+      ],
+      "lettera_gold_originale": "B"
+    },
+    "nutrition_video_nutrition_estimation_48": {
+      "domanda": "What is the ingredient with highest fat in this recipe?",
+      "nutriente": "fat",
+      "ricetta": "P09_R01",
+      "oracolo": "biscuits",
+      "oracolo_ing_id": "P01_R05_I04",
+      "valore_oracolo": 71.7,
+      "massimo_opzioni": 35.6,
+      "rapporto": 2.01,
+      "opzioni_originali": [
+        "vegetable oil",
+        "bamboo shoots",
+        "coconut milk",
+        "chilli",
+        "red curry paste"
+      ],
+      "lettera_gold_originale": "C"
+    },
+    "nutrition_video_nutrition_estimation_49": {
+      "domanda": "What is the ingredient with highest fat in this recipe?",
+      "nutriente": "fat",
+      "ricetta": "P06_R03",
+      "oracolo": "groundnut oil",
+      "oracolo_ing_id": "P05_R06_I11",
+      "valore_oracolo": 24.0,
+      "massimo_opzioni": 11.0,
+      "rapporto": 2.18,
+      "opzioni_originali": [
+        "cumin seeds",
+        "coriander powder",
+        "tomatoes",
+        "salted butter",
+        "onions"
+      ],
+      "lettera_gold_originale": "D"
+    },
+    "nutrition_video_nutrition_estimation_5": {
+      "domanda": "What is the ingredient with highest carbs in this recipe?",
+      "nutriente": "carbs",
+      "ricetta": "P08_R09",
+      "oracolo": "flour",
+      "oracolo_ing_id": "P05_R05_I05",
+      "valore_oracolo": 22.0,
+      "massimo_opzioni": 11.0,
+      "rapporto": 2.0,
+      "opzioni_originali": [
+        "soy sauce",
+        "ginger",
+        "sesame oil",
+        "crispy chilli oil",
+        "cucumber"
+      ],
+      "lettera_gold_originale": "E"
+    },
+    "nutrition_video_nutrition_estimation_6": {
+      "domanda": "What is the ingredient with highest protein in this recipe?",
+      "nutriente": "protein",
+      "ricetta": "P08_R06",
+      "oracolo": "eggs",
+      "oracolo_ing_id": "P06_R06_I02",
+      "valore_oracolo": 25.0,
+      "massimo_opzioni": 12.0,
+      "rapporto": 2.08,
+      "opzioni_originali": [
+        "garlic powder",
+        "cherry tomatoes",
+        "tuna",
+        "balsamic glaze",
+        "olive oil"
+      ],
+      "lettera_gold_originale": "C"
+    },
+    "nutrition_video_nutrition_estimation_7": {
+      "domanda": "What is the ingredient with highest calories in this recipe?",
+      "nutriente": "calories",
+      "ricetta": "P03_R01",
+      "oracolo": "potatoes",
+      "oracolo_ing_id": "P03_R04_I01",
+      "valore_oracolo": 1476.0,
+      "massimo_opzioni": 668.0,
+      "rapporto": 2.21,
+      "opzioni_originali": [
+        "spicy garlic & coconut paste, ginger lentil stock and dhal spice mix",
+        "split red lentils",
+        "onions",
+        "coconut milk",
+        "sunflower oil"
+      ],
+      "lettera_gold_originale": "D"
+    },
+    "nutrition_video_nutrition_estimation_8": {
+      "domanda": "What is the ingredient with highest carbs in this recipe?",
+      "nutriente": "carbs",
+      "ricetta": "P08_R06",
+      "oracolo": "gluten free flour",
+      "oracolo_ing_id": "P09_R02_I05",
+      "valore_oracolo": 60.0,
+      "massimo_opzioni": 28.0,
+      "rapporto": 2.14,
+      "opzioni_originali": [
+        "balsamic glaze",
+        "olive oil",
+        "garlic powder",
+        "fusilli pasta",
+        "cherry tomatoes"
+      ],
+      "lettera_gold_originale": "D"
+    },
+    "nutrition_video_nutrition_estimation_9": {
+      "domanda": "What is the ingredient with highest protein in this recipe?",
+      "nutriente": "protein",
+      "ricetta": "P07_R07",
+      "oracolo": "eggs",
+      "oracolo_ing_id": "P05_R04_I10",
+      "valore_oracolo": 22.5,
+      "massimo_opzioni": 11.2,
+      "rapporto": 2.01,
+      "opzioni_originali": [
+        "sweetcorn",
+        "greek yoghurt",
+        "avocado",
+        "parsley",
+        "black beans"
+      ],
+      "lettera_gold_originale": "E"
+    }
+  },
+  "scartate": [
+    {
+      "domanda": "nutrition_video_nutrition_estimation_4",
+      "motivo": "nessun ingrediente eleggibile"
+    }
+  ]
+}
