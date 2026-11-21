@@ -42,6 +42,7 @@ pyvenv.cfg
 .env.*
 *.key
 credentials.json
+chiave_api.txt
 
 # ---------- Dataset video HD-EPIC (decine di GB) ----------
 videos_image_nutrition_estimation/
@@ -81,16 +82,16 @@ huggingface/
 # ---------- Output di inferenza / log ----------
 outputs/
 output/
-results/
 runs/
 logs/
 *.log
 wandb/
 
-# ---------- Repository esterno clonato ----------
-preprocessing_folder/hd-epic-downloader/
+# ---------- Riferimenti bibliografici (PDF di altri autori: non si ridistribuiscono) ----------
+docs/riferimenti/*.pdf
 
-# ---------- Eccezioni: annotazioni e benchmark vanno versionati ----------
-!hd-epic-annotations/**/*.json
-!preprocessing_folder/*.json
-!preprocessing_folder/data/md5.txt
+# ---------- Dati pesanti, solo su Drive e in locale: stessa struttura della cartella su Drive ----------
+frames_*/
+videos_*/
+/HD-EPIC/
+/VIDEO_IMAGES/

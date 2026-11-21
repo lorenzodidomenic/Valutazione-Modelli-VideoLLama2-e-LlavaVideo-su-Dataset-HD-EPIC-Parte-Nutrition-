@@ -1,0 +1,19 @@
+# Ambiente di VideoLLaMA 2 7B su Colab L4 (Python 3.12). Riflette le celle di setup dei notebook.
+# NON installare insieme a envs/llavavideo.txt: transformers e' pinnato a versioni diverse.
+# Repo: https://github.com/DAMO-NLP-SG/VideoLLaMA2 @ c0bb03abf6b8a6b9a8dccac006fb4db5d4d9e414
+# Dopo il clone, patch di videollama2/model/encoder.py: "flash_attention_2" -> "eager" (vedi notebook).
+# Torch si installa con: pip install torch==2.7.0 torchvision==0.22.0 torchaudio==2.7.0 --index-url https://download.pytorch.org/whl/cu128
+torch==2.7.0
+torchvision==0.22.0
+torchaudio==2.7.0
+transformers==4.40.0
+tokenizers==0.19.1
+accelerate==0.26.1
+huggingface_hub>=0.23,<1.0
+timm>=1.0.3,<1.1
+einops
+decord==0.6.0
+av
+imageio
+opencv-python
+pandas

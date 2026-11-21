@@ -1,0 +1,12 @@
+# Ambiente di LLaVA-Video 7B su Colab L4. Riflette le celle di setup dei notebook.
+# NON installare insieme a envs/videollama2.txt: transformers e' pinnato a versioni diverse.
+# torch resta quello preinstallato da Colab.
+# Repo: https://github.com/LLaVA-VL/LLaVA-NeXT @ bce12e479bc4dfee2b9c50c88137b01ff51bd483
+# Dopo il clone: pip install -e ".[train]" --no-deps   (non deve toccare transformers)
+transformers==4.37.2
+accelerate>=0.29.1,<2
+av
+timm
+einops
+sentencepiece
+pandas
