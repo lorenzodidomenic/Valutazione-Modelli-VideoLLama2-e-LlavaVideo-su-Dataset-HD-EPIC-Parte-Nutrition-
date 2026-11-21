@@ -82,13 +82,16 @@ huggingface/
 # ---------- Output di inferenza / log ----------
 outputs/
 output/
-results/
 runs/
 logs/
 *.log
 wandb/
 
-# ---------- Eccezioni: annotazioni e benchmark vanno versionati ----------
-!hd-epic-annotations/**/*.json
-!preprocessing_folder/*.json
-!preprocessing_folder/data/md5.txt
+# ---------- Riferimenti bibliografici (PDF di altri autori: non si ridistribuiscono) ----------
+docs/riferimenti/*.pdf
+
+# ---------- Dati pesanti, solo su Drive e in locale: stessa struttura della cartella su Drive ----------
+frames_*/
+videos_*/
+/HD-EPIC/
+/VIDEO_IMAGES/

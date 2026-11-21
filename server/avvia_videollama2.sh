@@ -22,7 +22,7 @@ export CHIAVE_API=$(cat "$CHIAVE_FILE")
 export HF_HOME=$W/hf_cache
 export HF_HUB_OFFLINE=1                         # pesi gia' scaricati dal setup
 export DATI=${DATI:-$W/dati}                    # cartelle video* copiate da Drive
-export CODICE=${CODICE:-$QUI/../codice}         # per importare hdepic_eval
+export SRC=${SRC:-$QUI/../src}                   # per importare hdepic.eval
 export VL2_REPO=$W/repos/VideoLLaMA2
 
 mkdir -p "$W/logs"

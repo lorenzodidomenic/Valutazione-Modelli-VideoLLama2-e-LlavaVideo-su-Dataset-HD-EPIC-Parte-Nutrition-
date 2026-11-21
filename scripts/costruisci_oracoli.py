@@ -13,21 +13,21 @@ valore PIU' BASSO. Cosi' l'oracolo e' "molto migliore" ma non assurdo.
 Lo script e' deterministico: rieseguendolo si ottiene lo stesso file.
 
 Input  (dataset):
-  preprocessing_folder/nutrition_video_nutrition_estimation.json
-  tesi_ipotesi1_video/dati/complete_recipes.json
+  data/hd-epic/nutrition_video_nutrition_estimation.json
+  data/hd-epic/complete_recipes.json
 Output:
-  hd-epic-annotations/test_oracolo/dati/oracoli.json
+  data/derived/oracolo/oracoli.json
 """
 import json
 import os
 import re
 
 # ----------------------------------------------------------- percorsi
-# radice del progetto: due livelli sopra questo file (inference_folder/test_oracolo/)
-RADICE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-DATI_ORACOLO = os.path.join(RADICE, "hd-epic-annotations", "test_oracolo", "dati")
-DOMANDE = os.path.join(RADICE, "preprocessing_folder", "nutrition_video_nutrition_estimation.json")
-RICETTE = os.path.join(RADICE, "tesi_ipotesi1_video", "dati", "complete_recipes.json")
+# radice del progetto: la cartella sopra scripts/
+RADICE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATI_ORACOLO = os.path.join(RADICE, "data", "derived", "oracolo")
+DOMANDE = os.path.join(RADICE, "data", "hd-epic", "nutrition_video_nutrition_estimation.json")
+RICETTE = os.path.join(RADICE, "data", "hd-epic", "complete_recipes.json")
 OUTPUT = os.path.join(DATI_ORACOLO, "oracoli.json")
 
 # ----------------------------------------------------------- regole

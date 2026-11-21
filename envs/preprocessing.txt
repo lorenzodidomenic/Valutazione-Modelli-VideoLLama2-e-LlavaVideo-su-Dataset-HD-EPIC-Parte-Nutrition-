@@ -1,0 +1,6 @@
+# Preparazione dei dati in locale (download, campionamento, frame, pannelli).
+# extract_clip_frames richiede anche ffmpeg installato nel sistema.
+numpy
+opencv-python
+pillow
+tqdm

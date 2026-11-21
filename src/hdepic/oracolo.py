@@ -1,5 +1,5 @@
 """
-ablazione.py - passo 3: l'esperimento dell'ORACOLO, in versione semplice.
+oracolo.py - l'esperimento dell'ORACOLO, in versione semplice.
 
 L'idea in tre righe:
   - ogni domanda ha 5 opzioni originali, e la risposta giusta e' una di queste
@@ -14,7 +14,7 @@ Questo file fa tre cose:
   2. analizza()                conta quante volte il modello sceglie l'oracolo;
   3. confronta()               stampa una tabella con i risultati dei run.
 
-Il motore di inferenza e' hdepic_eval.py (nella stessa cartella). Non lo tocchiamo.
+Il motore di inferenza e' hdepic/eval.py (nella stessa cartella). Non lo tocchiamo.
 """
 import copy
 import json
@@ -23,23 +23,21 @@ import os
 import random
 
 # ----------------------------------------------------------- percorsi
-# La cartella del test ha sempre la stessa struttura, in locale e su Drive:
-#   <cartella>/dati/        oracoli.json, domande originali, annotazioni_oracolo/
-#   <cartella>/risultati/   un .jsonl per modello e condizione
-# In locale e' hd-epic-annotations/test_oracolo. Su Colab il notebook imposta
-# la variabile TEST_ORACOLO_DIR prima di importare questo file.
-_RADICE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-CARTELLA_ORACOLO = os.environ.get(
-    "TEST_ORACOLO_DIR",
-    os.path.join(_RADICE, "hd-epic-annotations", "test_oracolo"))
-DATI = os.path.join(CARTELLA_ORACOLO, "dati")
-RISULTATI = os.path.join(CARTELLA_ORACOLO, "risultati")
+# Tutti i percorsi partono dalla radice del progetto, ricavata dalla posizione di
+# questo file (<radice>/src/hdepic/oracolo.py). Funziona uguale sul Mac e su Drive,
+# perche' su Drive la cartella del progetto ha la stessa struttura del repository
+# (src/, data/, results/): vedi scripts/sync_drive.sh.
+RADICE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-DOMANDE_ORIGINALI = os.path.join(DATI, "nutrition_video_nutrition_estimation.json")
-ORACOLI = os.path.join(DATI, "oracoli.json")
-ANNOTAZIONI_ORACOLO = os.path.join(DATI, "annotazioni_oracolo",
+ANN_ORIGINALI_DIR = os.path.join(RADICE, "data", "hd-epic")          # le domande del benchmark
+DATI_ORACOLO = os.path.join(RADICE, "data", "derived", "oracolo")    # oracoli.json, annotazioni_oracolo/
+RISULTATI = os.path.join(RADICE, "results", "oracolo")               # un .jsonl per modello e condizione
+
+DOMANDE_ORIGINALI = os.path.join(ANN_ORIGINALI_DIR, "nutrition_video_nutrition_estimation.json")
+ORACOLI = os.path.join(DATI_ORACOLO, "oracoli.json")
+ANNOTAZIONI_ORACOLO = os.path.join(DATI_ORACOLO, "annotazioni_oracolo",
                                    "nutrition_video_nutrition_estimation.json")
-ANN_ORACOLO_DIR = os.path.join(DATI, "annotazioni_oracolo")   # cartella letta dal motore
+ANN_ORACOLO_DIR = os.path.join(DATI_ORACOLO, "annotazioni_oracolo")   # cartella letta dal motore
 TASK = "video_nutrition_estimation"
 
 # ----------------------------------------------------------- regole dell'esperimento
@@ -177,10 +175,10 @@ def esegui(modello, condizione, infer_fn, cartella_annotazioni, index, limit=Non
 
     cartella_annotazioni:
       ANN_ORACOLO_DIR  per O0 e O1 (49 domande a 6 opzioni)
-      DATI             per il controllo C0 (le 50 domande originali)
+      ANN_ORIGINALI_DIR  per il controllo C0 (le 50 domande originali)
     Se il run si interrompe, rilanciarlo riprende da dove era rimasto.
     """
-    import hdepic_eval as H          # importato qui: l'analisi locale non ne ha bisogno
+    from hdepic import eval as H     # importato qui: l'analisi locale non ne ha bisogno
     os.makedirs(RISULTATI, exist_ok=True)
     out = os.path.join(RISULTATI, nome_file(modello, condizione, prova))
     return H.run_task(TASK, cartella_annotazioni, index, infer_fn, out,

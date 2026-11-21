@@ -7,9 +7,9 @@ appropriata, usando ThreadPoolExecutor per download paralleli.
 URL base:  https://data.bris.ac.uk/datasets/3cqb5b81wk2dc2379fx1mrxh47/Videos/<PXX>/<video_id>.mp4
 
 Uso:
-    python3 download_missing.py              # default: 4 worker
-    python3 download_missing.py --workers 8
-    python3 download_missing.py --dry-run    # stampa cosa scaricherebbe senza farlo
+    python3 src/hdepic/preprocessing/download_missing.py   # default: 4 worker
+    python3 src/hdepic/preprocessing/download_missing.py --workers 8
+    python3 src/hdepic/preprocessing/download_missing.py --dry-run    # stampa cosa scaricherebbe senza farlo
 """
 
 import argparse
@@ -31,19 +31,20 @@ except ImportError:
 
 # ── Costanti ──────────────────────────────────────────────────────────────────
 BASE_URL = "https://data.bris.ac.uk/datasets/3cqb5b81wk2dc2379fx1mrxh47/"
-BASE_DIR = Path(__file__).resolve().parent.parent  # root del progetto
+BASE_DIR = Path(__file__).resolve().parents[3]  # root del progetto (<root>/src/hdepic/preprocessing/)
+ANN_DIR = BASE_DIR / "data" / "hd-epic"
 
 TASKS = {
     "nutrition_estimation": {
-        "ann": BASE_DIR / "preprocessing_folder" / "nutrition_video_nutrition_estimation.json",
+        "ann": ANN_DIR / "nutrition_video_nutrition_estimation.json",
         "video_dir": BASE_DIR / "videos_nutrition_estimation",
     },
     "nutrition_change": {
-        "ann": BASE_DIR / "preprocessing_folder" / "nutrition_nutrition_change.json",
+        "ann": ANN_DIR / "nutrition_nutrition_change.json",
         "video_dir": BASE_DIR / "videos_nutrition_change",
     },
     "image_nutrition_estimation": {
-        "ann": BASE_DIR / "preprocessing_folder" / "nutrition_image_nutrition_estimation.json",
+        "ann": ANN_DIR / "nutrition_image_nutrition_estimation.json",
         "video_dir": BASE_DIR / "videos_image_nutrition_estimation",
     },
 }

@@ -1,7 +1,17 @@
-import json
+"""Stampa il comando del downloader ufficiale per scaricare i video di un prototipo.
 
-# Carica il JSON
-with open("nutrition_image_nutrition_estimation.json") as f:
+Uso:  python3 scripts/id_videos_fetching.py [prototipo] [cartella-output]
+      prototipo: image_nutrition_estimation (default), video_nutrition_estimation, nutrition_change
+"""
+import json
+import sys
+from pathlib import Path
+
+RADICE = Path(__file__).resolve().parents[1]
+prototipo = sys.argv[1] if len(sys.argv) > 1 else "image_nutrition_estimation"
+output_path = sys.argv[2] if len(sys.argv) > 2 else "./HD-EPIC"
+
+with open(RADICE / "data" / "hd-epic" / f"nutrition_{prototipo}.json") as f:
     data = json.load(f)
 
 # Estrai tutti gli ID univoci dai campi inputs (es. "video 1", "video 2", ...)
@@ -10,11 +20,9 @@ for entry in data.values():
     for video in entry["inputs"].values():
         video_ids.add(video["id"])
 
-print(len(video_ids))
+print(len(video_ids), "video")
 video_ids_str = ",".join(sorted(video_ids))
 
-output_path = "./HD-EPIC"
-print(f"python hd-epic-downloader/hd-epic-downloader.py {output_path} --videos --video-id {video_ids_str}")
-
-
-python3 hd-epic-downloader/hd-epic-downloader.py ./VIDEO_IMAGES --videos --video-id P01-20240202-161354,P01-20240202-161948,P01-20240203-130505,P01-20240203-132119,P01-20240203-135502,P01-20240204-121042,P03-20240216-185832,P03-20240217-131219,P03-20240217-192543,P03-20240218-140054,P03-20240218-190556,P04-20240413-142619,P04-20240413-151722,P04-20240414-065311,P04-20240414-164751,P04-20240414-165333,P04-20240414-170520,P04-20240415-181212,P05-20240423-170021,P05-20240423-180529,P05-20240424-171038,P05-20240425-171455,P05-20240425-201444,P05-20240427-143353,P05-20240427-145526,P06-20240510-090328,P06-20240510-100047,P06-20240510-104642,P06-20240510-115307,P06-20240510-140459,P06-20240511-102207,P07-20240529-131737,P07-20240529-134410,P07-20240529-191007,P07-20240529-194518,P07-20240530-102543,P07-20240531-201703,P08-20240613-123547,P08-20240614-085000,P08-20240614-184945,P08-20240617-130401,P08-20240617-184909,P08-20240618-163547,P08-20240618-171546,P08-20240622-141902,P09-20240621-093545,P09-20240623-120359
+# il downloader legge data/md5.txt dalla cartella corrente: va lanciato da li'
+print("cd third_party/hd-epic-downloader")
+print(f"python3 hd-epic-downloader.py {output_path} --videos --video-id {video_ids_str}")

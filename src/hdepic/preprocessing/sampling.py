@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 import sys
 
-def campiona_e_salva_video(video_path, output_path, num_frames=124, fps_output=1):
+def campiona_e_salva_video(video_path, output_path, num_frames=128, fps_output=1):
     print(f"🎬 Apertura video: {os.path.basename(video_path)}")
     
     cap = cv2.VideoCapture(video_path)
@@ -76,8 +76,22 @@ def campiona_cartella(cartella_input, cartella_output, num_frames=128, fps_outpu
 
 
 if __name__ == "__main__":
-    BASE = "/Users/lorenzodidomenico/Desktop/PROGETTO DEEP LEARNING 1"
-    cartella_input  = os.path.join(BASE, "videos_3")
-    cartella_output = os.path.join(BASE, "videos_3_sampled")
+    import argparse
+    # radice del progetto: <radice>/src/hdepic/preprocessing/sampling.py
+    RADICE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+    parser = argparse.ArgumentParser(
+        description="Campiona 128 fotogrammi uniformi da ogni video di una cartella (1 fps in uscita).")
+    parser.add_argument("input", nargs="?", default="videos_nutrition_estimation",
+                        help="cartella dei video integrali (default: videos_nutrition_estimation)")
+    parser.add_argument("output", nargs="?", default=None,
+                        help="cartella di destinazione (default: <input>_sampled)")
+    parser.add_argument("--num-frames", type=int, default=128)
+    args = parser.parse_args()
 
-    campiona_cartella(cartella_input, cartella_output)
+    # percorsi relativi = relativi alla radice del progetto
+    cartella_input = args.input if os.path.isabs(args.input) else os.path.join(RADICE, args.input)
+    cartella_output = args.output or cartella_input.rstrip("/") + "_sampled"
+    if not os.path.isabs(cartella_output):
+        cartella_output = os.path.join(RADICE, cartella_output)
+
+    campiona_cartella(cartella_input, cartella_output, num_frames=args.num_frames)

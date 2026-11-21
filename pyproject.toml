@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hdepic"
+version = "0.1.0"
+description = "Valutazione di VideoLLaMA 2 e LLaVA-Video sul benchmark HD-EPIC (categoria Nutrition)"
+requires-python = ">=3.10"
+# Solo il necessario per valutare e analizzare i risultati. I modelli hanno ambienti propri e
+# incompatibili tra loro: vedi envs/.
+dependencies = ["pandas", "numpy"]
+
+[tool.setuptools.packages.find]
+where = ["src"]

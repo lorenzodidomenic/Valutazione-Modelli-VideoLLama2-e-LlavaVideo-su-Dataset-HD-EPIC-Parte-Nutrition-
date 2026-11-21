@@ -26,7 +26,7 @@ o è di un'altra ricetta.
 > - l'accordo con C0 è **≥ 80%**, e
 > - l'accuratezza non cambia in modo significativo (McNemar esatto, p ≥ 0.05).
 
-Le soglie sono in `codice/ablazione.py` (`SOGLIA_ACCORDO`, `ALPHA`).
+Le soglie sono in `src/hdepic/ablazione.py` (`SOGLIA_ACCORDO`, `ALPHA`).
 **Soglia da confermare col professore prima dei run.**
 
 Metriche di supporto:
@@ -37,22 +37,21 @@ Metriche di supporto:
 
 ## Struttura
 
+Il codice sta in `src/hdepic/` e i dati in `data/`, condivisi con il resto del progetto:
+
 ```
-tesi_ipotesi1_video/
-  codice/
-    hdepic_eval.py        copia INVARIATA del motore del baseline (v1.1)
-    ablazione.py          condizioni, costruzione degli scambi, metriche, grafico
-  dati/
-    complete_recipes.json ricette HD-EPIC (repo hd-epic-annotations, high-level/)
-    swap_map.json         domanda -> video originale, video di scambio, ricette
-    annotazioni_swap/     annotazioni del benchmark con SOLO l'id del video sostituito
-  notebook/
-    00_preparazione.ipynb locale, senza GPU: costruisce e verifica gli scambi (già eseguito)
-    01_videollama2.ipynb  Colab L4:   C1 e C3 per VideoLLaMA 2
-    02_llavavideo.ipynb   Colab L4:   C1 e C3 per LLaVA-Video
-    03_analisi.ipynb      locale o Colab senza GPU: tabella, verdetto, grafico, esempi
-  risultati/              un .jsonl per modello e condizione
-  figure/                 ipotesi1.png e ipotesi1.pdf, prodotti da 03_analisi
+src/hdepic/ablazione.py       condizioni, costruzione degli scambi, metriche, grafico
+                              (MANCANTE: vedi sotto)
+data/hd-epic/                 annotazioni originali e ricette (complete_recipes.json)
+data/derived/ipotesi_video/
+  swap_map.json               domanda -> video originale, video di scambio, ricette
+  annotazioni_swap/           annotazioni del benchmark con SOLO l'id del video sostituito
+notebooks/02_ipotesi_video/
+  00_preparazione.ipynb       locale, senza GPU: costruisce e verifica gli scambi
+  01_videollama2.ipynb        Colab L4: C1 e C3 per VideoLLaMA 2
+  02_llavavideo.ipynb         Colab L4: C1 e C3 per LLaVA-Video
+  03_analisi.ipynb            locale o Colab senza GPU: tabella, verdetto, grafico
+results/ipotesi_video/        un .jsonl per modello e condizione, figure/
 ```
 
 Nomi dei risultati, nello schema del motore (`<modello>_<condizione>_<task>.jsonl`):
@@ -79,11 +78,11 @@ pareggi si rompono con seed 0, così ogni video viene usato da 2 a 5 volte.
 
 - [x] Costruzione e verifica degli scambi (`00_preparazione`)
 - [ ] **Soglia confermata col professore**
-- [ ] **C0 al suo posto.** Su Drive, in `Progetto Deep Learning 1/risultati/`, trovare per
+- [ ] **C0 al suo posto.** Su Drive, in `Progetto Deep Learning 1/results/baseline/`, trovare per
       ciascun modello il `.jsonl` del baseline di `video_nutrition_estimation`. Deve avere
       50 domande, con accuratezza 66% per VideoLLaMA 2 e 68% per LLaVA-Video. Copiarlo in
-      `tesi_ipotesi1_video/risultati/` con il nome `<modello>_C0_video_video_nutrition_estimation.jsonl`.
-- [ ] Cartella `tesi_ipotesi1_video` caricata su Drive, dentro `Progetto Deep Learning 1/`
+      `results/ipotesi_video/` con il nome `<modello>_C0_video_video_nutrition_estimation.jsonl`.
+- [ ] `scripts/sync_drive.sh` lanciato dal Mac (copia `src/`, `data/`, `notebooks/` su Drive)
 - [ ] `01_videollama2` su Colab: prova rapida, controllo C0 (5/5 identiche), run completi
 - [ ] `02_llavavideo` su Colab, in una sessione nuova (le versioni di `transformers` sono incompatibili)
 - [ ] `03_analisi`

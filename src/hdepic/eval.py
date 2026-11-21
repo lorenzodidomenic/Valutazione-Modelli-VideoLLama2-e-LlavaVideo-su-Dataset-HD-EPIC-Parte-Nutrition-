@@ -1,5 +1,5 @@
 """
-hdepic_eval - motore di valutazione per HD-EPIC VQA, categoria Nutrition.
+hdepic.eval - motore di valutazione per HD-EPIC VQA, categoria Nutrition.
 
 Usato da entrambi i notebook di inferenza (VideoLLaMA2 e LLaVA-Video): tenere
 prompt, parsing e metriche in un unico posto e' cio' che rende confrontabili i
@@ -39,7 +39,7 @@ TASK_FILES = {
 VIDEO_TASKS = [t for t, (_, m) in TASK_FILES.items() if m == "video"]
 
 # Task i cui input sono clip [start_time, end_time] (da 1 a 27 s per nutrition_change).
-# I fotogrammi vengono estratti a monte da preprocessing_folder/extract_clip_frames.py.
+# I fotogrammi vengono estratti a monte da src/hdepic/preprocessing/clip_frames.py.
 CLIP_TASKS = ["nutrition_change"]
 
 # Task su cui ha senso l'esperimento Video Panels. Il paper applica i pannelli solo

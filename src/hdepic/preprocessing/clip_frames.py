@@ -10,7 +10,7 @@ benchmark e' la CLIP, non il video intero. Per ogni finestra lo script decodific
 con ffmpeg solo quel tratto (seek preciso al frame, richieste HTTP parziali) e
 salva N_FRAMES fotogrammi uniformi al suo interno.
 
-Output, uno per finestra (stesso nome che cerca hdepic_eval.clip_frames):
+Output, uno per finestra (stesso nome che cerca hdepic.eval.clip_frames):
     <out>/<video_id>_<start ms a 9 cifre>_<end ms a 9 cifre>/frame_000.jpg ... frame_127.jpg
 
 Le clip piu' corte di N_FRAMES fotogrammi (sotto ~4 s a 30 fps) hanno fotogrammi
@@ -24,8 +24,8 @@ Lo script e' riprendibile: le clip gia' complete vengono saltate.
 Requisiti: ffmpeg nel PATH (macOS: brew install ffmpeg).
 
 Uso:
-    python3 extract_clip_frames.py                      # output ~/Desktop/frames_nutrition_change
-    python3 extract_clip_frames.py --out <cartella> --workers 4 --max-side 768
+    python3 src/hdepic/preprocessing/clip_frames.py     # output <radice>/frames_nutrition_change
+    python3 src/hdepic/preprocessing/clip_frames.py --out <cartella> --workers 4 --max-side 768
 """
 
 import argparse
@@ -41,7 +41,7 @@ from pathlib import Path
 import numpy as np
 
 BASE_URL = "https://data.bris.ac.uk/datasets/3cqb5b81wk2dc2379fx1mrxh47/Videos"
-ANN = Path(__file__).resolve().parent / "nutrition_nutrition_change.json"
+ANN = Path(__file__).resolve().parents[3] / "data" / "hd-epic" / "nutrition_nutrition_change.json"
 N_FRAMES = 128
 
 
@@ -51,7 +51,7 @@ def hhmmss_to_sec(t):
 
 
 def clip_name(video_id, start, end):
-    # identico a hdepic_eval.clip_name
+    # identico a hdepic.eval.clip_name
     return f"{video_id}_{int(round(start * 1000)):09d}_{int(round(end * 1000)):09d}"
 
 
@@ -113,7 +113,7 @@ def extract_clip(video_id, start, end, out_dir, max_side, n=N_FRAMES, retries=3)
 def main():
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--out", default=str(Path.home() / "Desktop" / "frames_nutrition_change"))
+    parser.add_argument("--out", default=str(Path(__file__).resolve().parents[3] / "frames_nutrition_change"))
     parser.add_argument("--workers", type=int, default=4, help="clip elaborate in parallelo")
     parser.add_argument("--max-side", type=int, default=768,
                         help="lato lungo massimo in pixel (0 = risoluzione originale). "

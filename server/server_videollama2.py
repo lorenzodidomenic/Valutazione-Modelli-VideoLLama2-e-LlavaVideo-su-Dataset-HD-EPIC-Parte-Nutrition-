@@ -26,11 +26,11 @@ from typing import List, Optional, Union
 
 REPO = os.environ.get("VL2_REPO", "/workspace/repos/VideoLLaMA2")
 DATI = os.path.realpath(os.environ.get("DATI", "/workspace/dati"))
-CODICE = os.environ.get("CODICE", "/workspace/tesi/codice")
+SRC = os.environ.get("SRC", "/workspace/tesi/src")   # cartella src/ del repository
 CHIAVE = os.environ["CHIAVE_API"]
 MAX_NEW_TOKENS = 32                       # come nel notebook: la risposta e' una lettera
 
-sys.path.insert(0, CODICE)
+sys.path.insert(0, SRC)
 
 import numpy as np
 import torch
@@ -39,7 +39,7 @@ from fastapi import Depends, FastAPI, Header, HTTPException
 from huggingface_hub import snapshot_download
 from pydantic import BaseModel
 
-import hdepic_eval as H
+from hdepic import eval as H
 from videollama2 import mm_infer, model_init
 
 # ------------------------------------------------------------------ modello
@@ -90,7 +90,7 @@ def salute():
             "gpu": torch.cuda.get_device_name(0), "torch": torch.__version__,
             "transformers": transformers.__version__, "repo_commit": commit,
             "patch_eager": '"flash_attention_2"' not in enc,
-            "hdepic_eval": H.VERSION, "dati": DATI}
+            "hdepic.eval": H.VERSION, "dati": DATI}
 
 
 _INDICE = None

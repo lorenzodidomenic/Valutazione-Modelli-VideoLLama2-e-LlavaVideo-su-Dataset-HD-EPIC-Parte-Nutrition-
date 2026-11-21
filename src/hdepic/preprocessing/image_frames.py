@@ -6,14 +6,14 @@ direttamente dal server di Bristol, senza scaricarli (OpenCV fa richieste
 HTTP parziali e scarica solo il pezzo di file attorno al timestamp).
 
 I file escono con lo stesso nome che usa la cache del notebook
-(hdepic_eval._visual_input): <video_id>_<millisecondi a 9 cifre>.jpg
+(hdepic.eval._visual_input): <video_id>_<millisecondi a 9 cifre>.jpg
 e vanno caricati nella cartella frames_image_nutrition_estimation su Drive.
 
 Lo script e' riprendibile: i fotogrammi gia' presenti vengono saltati.
 
 Uso:
-    python3 extract_image_frames.py                      # output ~/Desktop/frames_image_nutrition_estimation
-    python3 extract_image_frames.py --out <cartella> --workers 6
+    python3 src/hdepic/preprocessing/image_frames.py    # output <radice>/frames_image_nutrition_estimation
+    python3 src/hdepic/preprocessing/image_frames.py --out <cartella> --workers 6
 """
 
 import argparse
@@ -28,7 +28,7 @@ from pathlib import Path
 import cv2
 
 BASE_URL = "https://data.bris.ac.uk/datasets/3cqb5b81wk2dc2379fx1mrxh47/Videos"
-ANN = Path(__file__).resolve().parent / "nutrition_image_nutrition_estimation.json"
+ANN = Path(__file__).resolve().parents[3] / "data" / "hd-epic" / "nutrition_image_nutrition_estimation.json"
 
 
 def hhmmss_to_sec(t):
@@ -37,7 +37,7 @@ def hhmmss_to_sec(t):
 
 
 def frame_name(video_id, sec):
-    # identico a hdepic_eval: f"{id}_{int(round(sec*1000)):09d}.jpg"
+    # identico a hdepic.eval: f"{id}_{int(round(sec*1000)):09d}.jpg"
     return f"{video_id}_{int(round(sec * 1000)):09d}.jpg"
 
 
@@ -95,7 +95,7 @@ def extract_video(video_id, secs, out_dir, retries=3):
 def main():
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--out", default=str(Path.home() / "Desktop" / "frames_image_nutrition_estimation"))
+    parser.add_argument("--out", default=str(Path(__file__).resolve().parents[3] / "frames_image_nutrition_estimation"))
     parser.add_argument("--workers", type=int, default=4, help="video elaborati in parallelo")
     args = parser.parse_args()
 

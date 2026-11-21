@@ -292,7 +292,8 @@ def process_video_folders(tasks_dict, C=32, panel_width=2, panel_height=2,
 # CONFIGURAZIONE
 # =====================================================================
 if __name__ == "__main__":
-    BASE_PATH = "/Users/lorenzodidomenico/Desktop/PROGETTO DEEP LEARNING 1/"
+    # radice del progetto: <radice>/src/hdepic/preprocessing/panels.py
+    BASE_PATH = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
     # Cartelle dei video NON sampled
     my_dataset_tasks = {
