@@ -1,6 +1,4 @@
 """
-costruisci_oracoli.py - passo 4: un ORACOLO per ogni domanda.
-
 L'oracolo e' un ingrediente che:
   1. ha un valore nutrizionale (calorie, carboidrati, proteine o grassi, quello
      chiesto dalla domanda) almeno OGNI_MOLTIPLICATORE volte piu' alto del
