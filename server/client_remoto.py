@@ -12,7 +12,7 @@ Nel notebook prende il posto delle celle di installazione e caricamento del mode
     infer_video, infer_testo = srv.infer_video, srv.infer_testo
 
 infer_video(visual, prompt) e infer_testo(prompt) hanno la stessa firma delle funzioni dei
-notebook, quindi hdepic.eval e ablazione non cambiano. Un errore del server solleva
+notebook, quindi hdepic.eval e hdepic.oracolo non cambiano. Un errore del server solleva
 un'eccezione: run_task la registra come risposta fallita e la rifa al rilancio.
 
 Prova veloce da terminale:

@@ -85,15 +85,13 @@ src/hdepic/                  codice del progetto (importato da notebook e script
 data/
   hd-epic/                   annotazioni originali del benchmark (3 prototipi, 200 domande)
   derived/oracolo/           oracoli.json e annotazioni a 6 opzioni
-  derived/ipotesi_video/     annotazioni con il video scambiato (C3)
 
 notebooks/
   00_baseline/               riproduzione del baseline: VideoLLaMA 2 e LLaVA-Video
-  02_ipotesi_video/          ipotesi 1: il modello usa davvero il video? (vedi il README della cartella)
-  03_oracolo/                ipotesi 2: l'oracolo (domande a 6 opzioni)
+  01_oracolo/                esperimento dell'oracolo (domande a 6 opzioni)
 
 results/                     un .jsonl per modello e condizione, versionati insieme al codice
-  baseline/  oracolo/  ipotesi_video/
+  baseline/  oracolo/
 
 scripts/                     strumenti da lanciare dal Mac
   sync_drive.sh              copia src/, data/ e notebooks/ su Google Drive
